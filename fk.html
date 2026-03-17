@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>3D 傅科擺模擬器 (Three.js)</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #111; font-family: sans-serif; }
+        #ui {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(0, 0, 0, 0.7); padding: 15px;
+            border-radius: 8px; color: white; pointer-events: auto;
+        }
+        button {
+            padding: 8px 12px; margin: 5px 0; cursor: pointer;
+            width: 100%; background: #444; color: white; border: 1px solid #666;
+        }
+        button:hover { background: #555; }
+        .label { font-size: 12px; color: #aaa; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <h3 style="margin-top:0">傅科擺 3D 模擬</h3>
+        <button id="btnView">切換至 XZ 平面 (側視)</button>
+        <button id="btnPlay">暫停</button>
+        <button id="btnReset">重置軌跡</button>
+        <div class="label">
+            座標系說明：<br>
+            - 綠色線：Y 軸 (垂直)<br>
+            - 紅色線：X 軸<br>
+            - 藍色線：Z 軸
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- 1. 初始化場景 ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // --- 2. 物理參數 ---
+        let time = 0;
+        let isRunning = true;
+        let viewMode = 'XY'; // 'XY' (俯視) 或 'XZ' (側視)
+        
+        const L = 8;             // 擺長
+        const g = 9.81;          // 重力
+        const omega = Math.sqrt(g / L) * 2; // 擺動頻率 (加速顯示)
+        const Omega = 0.1;       // 地球自轉引起的進動速度 (大幅加速以便觀察)
+        const amplitude = 4;     // 擺動幅度
+
+        // --- 3. 建立 3D 物體 ---
+        
+        // 懸掛點
+        const pivot = new THREE.Mesh(
+            new THREE.SphereGeometry(0.1),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
+        pivot.position.y = 5;
+        scene.add(pivot);
+
+        // 擺錘 (Bob)
+        const bob = new THREE.Mesh(
+            new THREE.SphereGeometry(0.3, 32, 32),
+            new THREE.MeshPhongMaterial({ color: 0x00ffcc, shininess: 100 })
+        );
+        scene.add(bob);
+
+        // 擺線 (Line)
+        const lineGeometry = new THREE.BufferGeometry();
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x888888 });
+        const line = new THREE.Line(lineGeometry, lineMaterial);
+        scene.add(line);
+
+        // 地面網格 (幫助觀察旋轉)
+        const grid = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+        grid.position.y = -4;
+        scene.add(grid);
+
+        // 座標軸輔助 (X=紅, Y=綠, Z=藍)
+        const axesHelper = new THREE.AxesHelper(5);
+        scene.add(axesHelper);
+
+        // 軌跡 (用於顯示歷史路徑)
+        const trailMaxPoints = 1000;
+        const trailGeometry = new THREE.BufferGeometry();
+        const trailVertices = new Float32Array(trailMaxPoints * 3);
+        trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailVertices, 3));
+        const trailMaterial = new THREE.LineBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.5 });
+        const trail = new THREE.Line(trailGeometry, trailMaterial);
+        scene.add(trail);
+        let trailIdx = 0;
+
+        // 燈光
+        const light = new THREE.PointLight(0xffffff, 50, 100);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        // --- 4. 動畫與物理邏輯 ---
+        function updatePhysics() {
+            if (!isRunning) return;
+
+            // 傅科擺公式在 3D 空間的投影
+            const x = amplitude * Math.cos(omega * time) * Math.cos(Omega * time);
+            const z = amplitude * Math.cos(omega * time) * Math.sin(Omega * time);
+            
+            // 保持擺長 L 不變，計算 Y 座標 (球面運動)
+            // L^2 = x^2 + (y_diff)^2 + z^2
+            const yDiff = -Math.sqrt(Math.max(0, L**2 - x**2 - z**2));
+            const y = pivot.position.y + yDiff;
+
+            bob.position.set(x, y, z);
+
+            // 更新擺線
+            lineGeometry.setFromPoints([pivot.position, bob.position]);
+
+            // 更新軌跡
+            trailVertices[trailIdx * 3] = x;
+            trailVertices[trailIdx * 3 + 1] = y;
+            trailVertices[trailIdx * 3 + 2] = z;
+            trailIdx = (trailIdx + 1) % trailMaxPoints;
+            trailGeometry.attributes.position.needsUpdate = true;
+
+            time += 0.02;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            updatePhysics();
+
+            // 相機視角控制
+            if (viewMode === 'XY') {
+                camera.position.lerp(new THREE.Vector3(0, 12, 0.1), 0.05); // 俯視
+                camera.lookAt(0, 0, 0);
+            } else {
+                camera.position.lerp(new THREE.Vector3(10, 2, 10), 0.05); // 側視
+                camera.lookAt(0, 0, 0);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // --- 5. UI 交互 ---
+        document.getElementById('btnView').onclick = (e) => {
+            if (viewMode === 'XY') {
+                viewMode = 'XZ';
+                e.target.innerText = '切換至 XY 平面 (俯視)';
+            } else {
+                viewMode = 'XY';
+                e.target.innerText = '切換至 XZ 平面 (側視)';
+            }
+        };
+
+        document.getElementById('btnPlay').onclick = (e) => {
+            isRunning = !isRunning;
+            e.target.innerText = isRunning ? '暫停' : '開始';
+        };
+
+        document.getElementById('btnReset').onclick = () => {
+            time = 0;
+            trailVertices.fill(0);
+            trailGeometry.attributes.position.needsUpdate = true;
+        };
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
