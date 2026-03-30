@@ -1,61 +1,58 @@
-<!DOCTYPE html>
+	<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>傅柯擺</title>
+    <title>傅柯擺俯視與透視模擬</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Microsoft JhengHei', sans-serif; }
         #ui { 
             position: absolute; top: 20px; left: 20px; 
-            background: rgba(15, 15, 20, 0.9); color: #fff; 
-            padding: 20px; border-radius: 12px; z-index: 100;
-            width: 260px; border: 1px solid #444;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            background: rgba(15, 15, 25, 0.9); color: #fff; 
+            padding: 18px; border-radius: 10px; z-index: 100;
+            width: 240px; border: 1px solid #444;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
-        .item { margin-bottom: 15px; }
-        label { display: block; font-size: 0.85em; color: #888; margin-bottom: 5px; }
-        input[type=range] { width: 100%; cursor: pointer; accent-color: #00ffcc; }
-        .val { float: right; color: #00ffcc; font-weight: bold; font-family: monospace; }
-        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-group { display: flex; gap: 8px; margin-bottom: 12px; }
         button { 
-            flex: 1; padding: 12px; border: 1px solid #00ffcc; 
-            cursor: pointer; border-radius: 6px; font-weight: bold;
-            transition: all 0.2s;
+            flex: 1; padding: 10px; cursor: pointer; border-radius: 6px; 
+            border: 1px solid #00ffcc; background: transparent; color: #00ffcc; font-weight: bold;
+            transition: 0.2s;
         }
-        #pauseBtn { background: #ff4444; color: #fff; border-color: #ff4444; }
-        #pauseBtn.running { background: #00ffcc; color: #000; border-color: #00ffcc; }
-        #resetBtn { background: transparent; color: #00ffcc; }
-        #resetBtn:hover { background: rgba(0,255,204,0.1); }
-        #info { font-size: 0.8em; margin-top: 15px; color: #999; border-top: 1px solid #333; padding-top: 15px; }
+        button:hover { background: rgba(0,255,204,0.1); }
+        #pauseBtn.running { background: #00ffcc; color: #000; }
+        .label { font-size: 0.85em; color: #aaa; margin-top: 12px; }
+        .val { float: right; color: #00ffcc; font-family: monospace; }
+        input[type=range] { width: 100%; margin-top: 5px; cursor: pointer; accent-color: #00ffcc; }
+        #info { font-size: 0.75em; color: #777; margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; line-height: 1.5; }
     </style>
 </head>
 <body>
 
 <div id="ui">
-    <div style="text-align:center; font-weight:bold; font-size:1.1em; margin-bottom:15px; color:#00ffcc;">傅科擺</div>
+    <div style="color:#00ffcc; font-weight:bold; margin-bottom:15px; text-align:center; font-size: 1.1em;">傅柯擺模擬</div>
     
+    <button id="pauseBtn" style="width:100%; margin-bottom:10px;" onclick="togglePause()">開始模擬</button>
+    
+    <div class="label">切換視角：</div>
     <div class="btn-group">
-        <button id="pauseBtn" onclick="togglePause()">開始 (Resume)</button>
-    </div>
-    <div class="btn-group">
-        <button id="resetBtn" onclick="resetSim()">重置軌跡 (Reset)</button>
+        <button onclick="setView('top')">正上方俯視</button>
+        <button onclick="setView('iso')">透視圖</button>
     </div>
 
-    <div class="item" style="margin-top:20px;">
-        <label>所在地緯度: <span id="latV" class="val">48.8</span>°</label>
-        <input type="range" id="lat" min="-90" max="90" value="48.8" step="0.1">
-    </div>
-    <div class="item">
-        <label>模擬加速: <span id="spdV" class="val">100</span>x</label>
-        <input type="range" id="spd" min="1" max="1000" value="100">
-    </div>
+    <div class="label">所在地緯度: <span id="latV" class="val">48.8</span>°</div>
+    <input type="range" id="lat" min="-90" max="90" value="48.8" step="0.1">
+
+    <div class="label">模擬加速: <span id="spdV" class="val">100</span>x</div>
+    <input type="range" id="spd" min="1" max="1000" value="100">
+
+    <button style="width:100%; margin-top:15px; border-color:#ff4444; color:#ff4444;" onclick="resetSim()">重置軌跡</button>
 
     <div id="info">
-        擺長: 76m | 週期: 17.5s<br>
-        進動週期: <span id="precT" style="color:white">--</span> 小時<br>
-        軌跡點數: <span id="pointCount" style="color:#ff4444">0</span><br>
+        進動週期: <span id="precT" style="color:#fff">--</span> 小時<br>
+        軌跡點數: <span id="pointCount" style="color:#fff">0</span><br>
+        <hr style="border:0; border-top:1px solid #333">
         移動端:單指:移動角度，雙指:移動方向、放大縮小<br>
         電腦端:左鍵:移動角度，右鍵:移動方向，滾輪:放大縮小
     </div>
@@ -65,23 +62,23 @@
     let scene, camera, renderer, controls, bob, line, pathLine;
     let pathPoints = [];
     let isPaused = true;
- 
-    const L = 76.0;
+    
+    const L = 76;
     const g = 9.80665;
     const earthOmega = 7.2921e-5;
-    const pivotY = L + 2;
-
-    let theta = 0.15;
+    const pivotY = L + 2; 
+    
+    let theta = 0.2;
     let thetaV = 0;
     let alpha = 0;
     let lastThetaV = 0;
 
     function init() {
         scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.002);
+        scene.fog = new THREE.FogExp2(0x000000, 0.001);
 
-        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.5, 3000);
-        camera.position.set(60, 40, 90);
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 2000);
+        camera.position.set(130, 90, 130); 
 
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -91,65 +88,74 @@
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        scene.add(new THREE.GridHelper(200, 40, 0x222222, 0x111111));
-        scene.add(new THREE.AmbientLight(0x333333));
-        const sun = new THREE.DirectionalLight(0xffffff, 1.0);
-        sun.position.set(50, 100, 50);
-        scene.add(sun);
-        
+        scene.add(new THREE.GridHelper(200, 40, 0x333333, 0x222222));
+
+        const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+        sun.position.set(50, 150, 50);
+        scene.add(sun, new THREE.AmbientLight(0x444444));
+
         bob = new THREE.Mesh(
-            new THREE.SphereGeometry(1.5, 32, 32), 
-            new THREE.MeshPhongMaterial({ color: 0xffd700, specular: 0xffffff, shininess: 100 })
+            new THREE.SphereGeometry(1.8, 32, 32), 
+            new THREE.MeshPhongMaterial({color: 0xffd700, specular: 0xffffff, shininess: 80})
         );
         scene.add(bob);
 
-        line = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x888888, opacity: 0.5, transparent: true }));
+        line = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color: 0xaaaaaa, transparent: true, opacity: 0.4}));
         scene.add(line);
 
-        pathLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.6 }));
+        pathLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color: 0xff3333}));
         scene.add(pathLine);
 
         animate();
     }
 
+    // 視角切換
+    function setView(type) {
+        if (type === 'top') {
+            camera.position.set(0, 200, 0); 
+            controls.target.set(0, 0, 0);
+        } else {
+            camera.position.set(130, 90, 130); 
+            controls.target.set(0, 10, 0);
+        }
+        controls.update();
+    }
+
     function togglePause() {
         isPaused = !isPaused;
         const btn = document.getElementById('pauseBtn');
-        if (isPaused) {
-            btn.innerText = "開始 (Resume)";
-            btn.classList.remove('running');
-        } else {
-            btn.innerText = "暫停 (Pause)";
-            btn.classList.add('running');
-        }
+        btn.innerText = isPaused ? "開始模擬" : "暫停中 (運行)";
+        btn.className = isPaused ? "" : "running";
     }
 
     function animate() {
         requestAnimationFrame(animate);
         
         const speed = parseFloat(document.getElementById('spd').value);
-        const latDeg = parseFloat(document.getElementById('lat').value);
-        const latRad = latDeg * Math.PI / 180;
+        const latVal = parseFloat(document.getElementById('lat').value);
+        const latRad = latVal * Math.PI / 180;
         
+        document.getElementById('latV').innerText = latVal;
         document.getElementById('spdV').innerText = speed;
-        document.getElementById('latV').innerText = latDeg;
-        document.getElementById('precT').innerText = (latDeg === 0) ? "∞" : Math.abs(24 / Math.sin(latRad)).toFixed(1);
+        document.getElementById('precT').innerText = (latVal === 0) ? "∞" : Math.abs(24 / Math.sin(latRad)).toFixed(1);
         document.getElementById('pointCount').innerText = pathPoints.length;
 
         if (!isPaused) {
-            const dt = 0.016 * speed;
-            const subSteps = 10;
-            const sdt = dt / subSteps;
+            let totalDt = 0.016 * speed; 
+            let subSteps = Math.ceil(speed * 0.8); 
+            let sdt = totalDt / subSteps;
 
-            for(let i=0; i < subSteps; i++) {
+            for(let i=0; i<subSteps; i++) {
                 let thetaAcc = -(g / L) * Math.sin(theta);
                 thetaV += thetaAcc * sdt;
                 theta += thetaV * sdt;
+                
                 alpha += (earthOmega * Math.sin(latRad)) * sdt;
 
                 if ((lastThetaV >= 0 && thetaV < 0) || (lastThetaV <= 0 && thetaV > 0)) {
                     const r = L * Math.sin(theta);
-                    pathPoints.push(new THREE.Vector3(r * Math.cos(alpha), 0.05, r * Math.sin(alpha)));
+                    pathPoints.push(new THREE.Vector3(r * Math.cos(alpha), 0.1, r * Math.sin(alpha)));
+                    
                     pathLine.geometry.setFromPoints(pathPoints);
                 }
                 lastThetaV = thetaV;
@@ -158,6 +164,7 @@
 
         const r = L * Math.sin(theta);
         bob.position.set(r * Math.cos(alpha), pivotY - L * Math.cos(theta), r * Math.sin(alpha));
+        
         line.geometry.setFromPoints([new THREE.Vector3(0, pivotY, 0), bob.position]);
 
         controls.update();
@@ -167,10 +174,7 @@
     function resetSim() {
         pathPoints = [];
         pathLine.geometry.setFromPoints([]);
-        theta = 0.15;
-        thetaV = 0;
-        alpha = 0;
-        lastThetaV = 0;
+        theta = 0.2; thetaV = 0; alpha = 0; lastThetaV = 0;
     }
 
     init();
