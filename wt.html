@@ -59,18 +59,6 @@
   .sol-card:hover .beaker { transform: scale(1.05) rotate(-2deg); transition: 0.3s; }
   .sol-card.selected { outline: 3px solid #fde047; outline-offset: 4px; }
   
-  .litmus {
-    width: 38px;
-    height: 110px;
-    border-radius: 4px;
-    background: linear-gradient(to bottom, #fecaca 0%, #fecaca 50%, #bfdbfe 50%, #bfdbfe 100%);
-    position: relative;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  }
-  .litmus.red-result { background: linear-gradient(to bottom, #fecaca 0%, #fecaca 50%, #ef4444 50%, #dc2626 100%); }
-  .litmus.blue-result { background: linear-gradient(to bottom, #3b82f6 0%, #1d4ed8 50%, #bfdbfe 50%, #bfdbfe 100%); }
-  .litmus.neutral-result { background: linear-gradient(to bottom, #fecaca 0%, #fecaca 50%, #bfdbfe 50%, #bfdbfe 100%); }
-  
   .nav-btn.active { background: #fde047; color: #0c4a6e; box-shadow: 0 6px 0 #ca8a04; }
   .page-section { display: none; }
   .page-section.active { display: block; }
@@ -88,6 +76,18 @@
   .drop-zone.correct { border-color: #4ade80; background: rgba(74,222,128,0.2); }
   .drop-zone.wrong { border-color: #f87171; background: rgba(248,113,113,0.2); }
   .draggable { cursor: grab; }
+  
+  .litmus {
+    width: 38px;
+    height: 110px;
+    border-radius: 4px;
+    background: linear-gradient(to bottom, #fecaca 0%, #fecaca 50%, #bfdbfe 50%, #bfdbfe 100%);
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .litmus.red-result { background: linear-gradient(to bottom, #fecaca 0%, #fecaca 50%, #ef4444 50%, #dc2626 100%); }
+  .litmus.blue-result { background: linear-gradient(to bottom, #3b82f6 0%, #1d4ed8 50%, #bfdbfe 50%, #bfdbfe 100%); }
+  .litmus.neutral-result { background: linear-gradient(to bottom, #fecaca 0%, #fecaca 50%, #bfdbfe 50%, #bfdbfe 100%); }
 </style>
  </head>
  <body class="h-full w-full">
@@ -101,8 +101,9 @@
      <p class="text-sky-200 text-base md:text-lg font-bold">指示劑變色反應與物理性質模擬</p>
     </header>
 
-    <nav class="flex justify-center gap-4 mb-6">
+    <nav class="flex flex-wrap justify-center gap-4 mb-6">
      <button id="toLab" class="nav-btn active font-black px-6 py-3 rounded-2xl bg-yellow-300 text-sky-900 transition-all"> <i data-lucide="test-tube-2" class="w-5 h-5 inline -mt-1"></i> 性質觀察室 </button>
+     <button id="toComposition" class="nav-btn font-black px-6 py-3 rounded-2xl bg-white/10 text-white transition-all hover:bg-white/20"> <i data-lucide="component" class="w-5 h-5 inline -mt-1"></i> 組成比例觀測 </button>
      <button id="toMatch" class="nav-btn font-black px-6 py-3 rounded-2xl bg-white/10 text-white transition-all hover:bg-white/20"> <i data-lucide="layout-grid" class="w-5 h-5 inline -mt-1"></i> 溶液性質分類 </button>
     </nav>
 
@@ -133,18 +134,59 @@
           <div id="conductivityResultBox" class="mt-4 text-xs font-bold text-center hidden"></div>
         </div>
       </div>
-
       <div class="mt-8 text-center">
         <button id="resetBtn" class="bg-white/10 hover:bg-white/20 font-bold px-10 py-2 rounded-2xl text-sm border border-white/20">重置樣品</button>
       </div>
      </div>
     </section>
 
+    <section id="composition-page" class="page-section">
+      <div class="glass rounded-3xl p-5 md:p-8">
+       <h2 class="text-xl md:text-2xl font-black mb-4 flex items-center gap-2"><span class="bg-yellow-300 text-sky-900 w-8 h-8 rounded-full inline-flex items-center justify-center">2</span> 溶液組成拆解</h2>
+       <div id="compGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"></div>
+       
+       <div class="bg-sky-950/40 rounded-3xl p-8 relative overflow-hidden min-h-[350px]">
+         <div id="compPlaceholder" class="absolute inset-0 flex items-center justify-center text-sky-400/50 font-bold">請在上方選擇一種溶液開始拆解</div>
+         
+         <div id="compDisplay" class="hidden flex flex-col md:flex-row items-center justify-around gap-8">
+           <div class="text-center">
+             <div class="text-xs font-black text-red-300 mb-2">SOLUTE 溶質</div>
+             <div class="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center text-4xl shadow-xl border border-white/20" id="soluteIcon"></div>
+             <div class="mt-3 font-black text-lg" id="soluteName"></div>
+           </div>
+           
+           <div class="text-4xl text-yellow-300 font-black">+</div>
+           
+           <div class="text-center">
+             <div class="text-xs font-black text-blue-300 mb-2">SOLVENT 溶劑</div>
+             <div class="w-24 h-24 bg-sky-400/20 rounded-full flex items-center justify-center text-4xl shadow-xl border border-sky-400/20" id="solventIcon">💧</div>
+             <div class="mt-3 font-black text-lg" id="solventName">水</div>
+           </div>
+           
+           <div class="text-4xl text-yellow-300 font-black">=</div>
+           
+           <div class="text-center">
+             <div class="text-xs font-black text-green-300 mb-2">SOLUTION 溶液</div>
+             <div class="beaker mx-auto" id="finalBeaker"></div>
+             <div class="mt-3 font-black text-lg" id="solutionName"></div>
+           </div>
+         </div>
+       </div>
+       
+       <div class="mt-8 glass p-6 rounded-2xl">
+         <h4 class="font-black text-yellow-300 mb-2 flex items-center gap-2"><i data-lucide="info"></i> 科學小筆記：</h4>
+         <p class="text-sm text-sky-100 leading-relaxed">
+           水溶液是由被溶解的物質（稱為<b>溶質</b>）與用來溶解的物質（稱為<b>溶劑</b>，通常是水）混合而成的均勻混合物。
+           公式：<span class="bg-white/10 px-2 py-0.5 rounded text-white">溶質 + 溶劑 = 溶液</span>
+         </p>
+       </div>
+      </div>
+    </section>
+
     <section id="match-page" class="page-section">
      <div class="glass rounded-3xl p-5 md:p-8">
       <h2 class="text-xl md:text-2xl font-black mb-2">性質歸類觀測</h2>
       <p class="text-sky-200 mb-6 text-sm">請將樣品拖曳至對應區域（每個樣品在各群組限歸類一次）</p>
-      
       <div id="matchPool" class="flex flex-wrap gap-3 justify-center mb-8 min-h-[100px] p-4 bg-sky-950/40 rounded-2xl"></div>
       
       <h3 class="font-black mb-4 flex items-center gap-2 text-yellow-300"><i data-lucide="filter"></i> 酸鹼性質分類</h3>
@@ -184,21 +226,22 @@
   </main>
 
   <script>
+// 擴充資料：加入溶質(solute)與溶劑(solvent)資訊
 const solutions = [
-  { id: 'vinegar', name: '食醋', ph: 'acid', cond: 'yes', color: '#fbbf24', emoji: '🍶', cabbage: '#ef4444' },
-  { id: 'lemon', name: '檸檬汁', ph: 'acid', cond: 'yes', color: '#facc15', emoji: '🍋', cabbage: '#f43f5e' },
-  { id: 'cola', name: '汽水', ph: 'acid', cond: 'yes', color: '#78350f', emoji: '🥤', cabbage: '#fb7185' },
-  { id: 'water', name: '純水', ph: 'neutral', cond: 'no', color: '#7dd3fc', emoji: '💧', cabbage: '#9333ea' },
-  { id: 'salt', name: '食鹽水', ph: 'neutral', cond: 'yes', color: '#e0f2fe', emoji: '🧂', cabbage: '#9333ea' },
-  { id: 'sugar', name: '糖水', ph: 'neutral', cond: 'no', color: '#fef3c7', emoji: '🍯', cabbage: '#9333ea' },
-  { id: 'soap', name: '肥皂水', ph: 'base', cond: 'yes', color: '#c7d2fe', emoji: '🧼', cabbage: '#22c55e' },
-  { id: 'ammonia', name: '氨水', ph: 'base', cond: 'yes', color: '#a5f3fc', emoji: '🧴', cabbage: '#10b981' },
+  { id: 'vinegar', name: '食醋', ph: 'acid', cond: 'yes', color: '#fbbf24', emoji: '🍶', cabbage: '#ef4444', solute: '醋酸', soluteEmoji: '🧪' },
+  { id: 'lemon', name: '檸檬汁', ph: 'acid', cond: 'yes', color: '#facc15', emoji: '🍋', cabbage: '#f43f5e', solute: '檸檬酸', soluteEmoji: '🍋' },
+  { id: 'cola', name: '汽水', ph: 'acid', cond: 'yes', color: '#78350f', emoji: '🥤', cabbage: '#fb7185', solute: '二氧化碳', soluteEmoji: '💨' },
+  { id: 'water', name: '純水', ph: 'neutral', cond: 'no', color: '#7dd3fc', emoji: '💧', cabbage: '#9333ea', solute: '無(純物質)', soluteEmoji: '🚫' },
+  { id: 'salt', name: '食鹽水', ph: 'neutral', cond: 'yes', color: '#e0f2fe', emoji: '🧂', cabbage: '#9333ea', solute: '食鹽', soluteEmoji: '🧂' },
+  { id: 'sugar', name: '糖水', ph: 'neutral', cond: 'no', color: '#fef3c7', emoji: '🍯', cabbage: '#9333ea', solute: '砂糖', soluteEmoji: '🍬' },
+  { id: 'soap', name: '肥皂水', ph: 'base', cond: 'yes', color: '#c7d2fe', emoji: '🧼', cabbage: '#22c55e', solute: '肥皂分子', soluteEmoji: '🧼' },
+  { id: 'ammonia', name: '氨水', ph: 'base', cond: 'yes', color: '#a5f3fc', emoji: '🧴', cabbage: '#10b981', solute: '氨氣', soluteEmoji: '☁️' },
 ];
 
 let selectedSol = null;
 let userMatches = {}; 
 
-
+// Navigation
 function switchPage(pageId, btnId) {
   document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
   document.getElementById(pageId).classList.add('active');
@@ -206,17 +249,21 @@ function switchPage(pageId, btnId) {
   document.getElementById(btnId).classList.add('active');
 }
 document.getElementById('toLab').onclick = () => switchPage('lab-page', 'toLab');
+document.getElementById('toComposition').onclick = () => switchPage('composition-page', 'toComposition');
 document.getElementById('toMatch').onclick = () => switchPage('match-page', 'toMatch');
 
-// Lab Logic
+// Lab Logic (與原本相同)
 const solGrid = document.getElementById('solutionGrid');
+const compGrid = document.getElementById('compGrid');
+
 solutions.forEach(sol => {
+  // 性質觀察室的卡片
   const card = document.createElement('button');
   card.className = 'sol-card glass rounded-2xl p-4 hover:bg-white/15 transition-all';
   card.innerHTML = `<div class="beaker mx-auto mb-2" style="--liq:${sol.color}"></div><div class="font-black text-sm">${sol.emoji} ${sol.name}</div>`;
   card.onclick = () => {
     selectedSol = sol;
-    document.querySelectorAll('.sol-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('#solutionGrid .sol-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
     document.getElementById('testBtn').disabled = false;
     document.getElementById('cabbageBtn').disabled = false;
@@ -224,7 +271,30 @@ solutions.forEach(sol => {
     resetDisplays();
   };
   solGrid.appendChild(card);
+
+  // 組成比例觀測的卡片 (複製邏輯)
+  const compCard = card.cloneNode(true);
+  compCard.onclick = () => {
+    document.querySelectorAll('#compGrid .sol-card').forEach(c => c.classList.remove('selected'));
+    compCard.classList.add('selected');
+    showComposition(sol);
+  };
+  compGrid.appendChild(compCard);
 });
+
+function showComposition(sol) {
+  document.getElementById('compPlaceholder').classList.add('hidden');
+  const display = document.getElementById('compDisplay');
+  display.classList.remove('hidden');
+  display.classList.add('pop');
+  
+  document.getElementById('soluteIcon').textContent = sol.soluteEmoji;
+  document.getElementById('soluteName').textContent = sol.solute;
+  document.getElementById('solutionName').textContent = sol.name;
+  document.getElementById('finalBeaker').style.setProperty('--liq', sol.color);
+  
+  setTimeout(() => display.classList.remove('pop'), 400);
+}
 
 function resetDisplays() {
   document.getElementById('resultBox').classList.add('hidden');
@@ -274,17 +344,14 @@ document.getElementById('resetBtn').onclick = () => {
   resetDisplays();
 };
 
-// Match Logic
+// Match Logic (與原本相同)
 function initMatch() {
   const pool = document.getElementById('matchPool');
   pool.innerHTML = '';
   userMatches = {};
   document.querySelectorAll('.match-items').forEach(mi => mi.innerHTML = '');
   document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('correct', 'wrong'));
-  
-  solutions.forEach(sol => {
-    createChip(sol);
-  });
+  solutions.forEach(sol => createChip(sol));
 }
 
 function createChip(sol) {
@@ -306,7 +373,7 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
     zone.classList.remove('over');
     const id = e.dataTransfer.getData('solId');
     const sol = solutions.find(s => s.id === id);
-    const group = zone.dataset.group; // 'ph' 或 'cond'
+    const group = zone.dataset.group;
     const type = zone.dataset.type;
 
     const isCorrect = (group === 'ph' && sol.ph === type) || (group === 'cond' && sol.cond === type);
@@ -318,7 +385,6 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
         const oldItem = oldContainer.querySelector(`[data-sol-id="${id}"]`);
         if (oldItem) oldItem.remove();
       }
-
       if (!userMatches[id]) userMatches[id] = {};
       userMatches[id][group] = type;
 
@@ -327,7 +393,6 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
       chip.className = 'bg-white/20 rounded-lg px-2 py-1 text-[10px] font-bold pop flex items-center gap-1';
       chip.innerHTML = `<span>${sol.emoji}</span><span>${sol.name}</span>`;
       zone.querySelector('.match-items').appendChild(chip);
-      
       zone.classList.add('correct');
       setTimeout(() => zone.classList.remove('correct'), 500);
 
