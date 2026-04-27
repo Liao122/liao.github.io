@@ -20,7 +20,7 @@
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(255,255,255,0.15);
   }
-  /* 頁面切換動畫優化 */
+
   .page-section { display: none; opacity: 0; transform: translateY(15px); }
   .page-section.active { 
     display: block; 
@@ -30,7 +30,6 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* 導覽按鈕顏色切換優化 */
   .nav-btn { 
     background: rgba(12, 74, 110, 0.6); 
     color: white; 
@@ -86,7 +85,7 @@
 
     <section id="lab-page" class="page-section active">
      <div class="glass rounded-3xl p-5 md:p-8">
-      <h2 class="text-xl md:text-2xl font-black mb-4 text-yellow-300">1. 選擇待測樣品</h2>
+      <h2 class="text-xl md:text-2xl font-black mb-4 text-yellow-300">選擇待測樣品</h2>
       <div id="solutionGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"></div>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-sky-950/40 rounded-2xl p-6 flex flex-col items-center">
@@ -252,7 +251,6 @@ function initPropMatch() {
     tag.className = 'bg-white/10 px-4 py-2 rounded-xl font-bold cursor-grab hover:bg-white/20 border border-white/5';
     tag.draggable = true;
     tag.textContent = s.emoji + ' ' + s.name;
-    // 將所有性質封裝在一個標籤數據中
     tag.ondragstart = (e) => e.dataTransfer.setData('text/plain', JSON.stringify({
       text: s.name, 
       ph: s.ph, 
@@ -294,14 +292,12 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
     const group = zone.dataset.group; // 'ph', 'cond', or 'role'
     const targetType = zone.dataset.type;
 
-    // 判斷邏輯：如果 group 是 role，檢查 type；如果是性質分類，檢查對應屬性
     const isCorrect = (group === 'role' && data.type === targetType) || 
                       (group === 'ph' && data.ph === targetType) || 
                       (group === 'cond' && data.cond === targetType);
 
     if (isCorrect) {
       const itemsContainer = zone.querySelector('.match-items');
-      // 避免重複放入同一個標籤
       if ([...itemsContainer.children].some(c => c.textContent === data.text)) return;
       
       const chip = document.createElement('div');
