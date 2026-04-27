@@ -20,15 +20,12 @@
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(255,255,255,0.15);
   }
-
   .page-section { display: none; opacity: 0; transform: translateY(15px); }
   .page-section.active { 
     display: block; 
     animation: fadeInSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
-  @keyframes fadeInSlide {
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeInSlide { to { opacity: 1; transform: translateY(0); } }
 
   .nav-btn { 
     background: rgba(12, 74, 110, 0.6); 
@@ -43,7 +40,6 @@
     transform: translateY(-2px);
   }
 
-  /* 燒杯與實驗組件 */
   .beaker {
     width: 110px; height: 140px; position: relative;
     border: 4px solid rgba(255,255,255,0.7); border-top: none;
@@ -66,6 +62,8 @@
   @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
   .pop { animation: pop 0.4s ease; }
   @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  .info-text { animation: fadeIn 0.3s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
  </head>
  <body class="h-full w-full">
@@ -91,17 +89,20 @@
         <div class="bg-sky-950/40 rounded-2xl p-6 flex flex-col items-center">
           <h3 class="font-bold mb-4 text-sky-200">石蕊試紙觀測</h3>
           <div id="litmusPaper" class="litmus mb-4"></div>
-          <button id="testBtn" class="bg-yellow-300 text-sky-900 w-full font-black py-3 rounded-xl disabled:opacity-40" disabled>檢測酸鹼</button>
+          <button id="testBtn" class="bg-yellow-300 text-sky-900 w-full font-black py-3 rounded-xl disabled:opacity-40 mb-3" disabled>檢測酸鹼</button>
+          <p id="litmusText" class="text-xs font-bold text-center h-8 info-text"></p>
         </div>
         <div class="bg-sky-950/40 rounded-2xl p-6 flex flex-col items-center">
           <h3 class="font-bold mb-4 text-sky-200">紫色甘藍菜汁</h3>
           <div class="beaker mb-4" id="cabbageBeaker" style="--liq:#9333ea;"></div>
-          <button id="cabbageBtn" class="bg-yellow-300 text-sky-900 w-full font-black py-3 rounded-xl disabled:opacity-40" disabled>滴入菜汁</button>
+          <button id="cabbageBtn" class="bg-yellow-300 text-sky-900 w-full font-black py-3 rounded-xl disabled:opacity-40 mb-3" disabled>滴入菜汁</button>
+          <p id="cabbageText" class="text-xs font-bold text-center h-8 info-text"></p>
         </div>
         <div class="bg-sky-950/40 rounded-2xl p-6 flex flex-col items-center">
           <h3 class="font-bold mb-4 text-sky-200">導電性質</h3>
           <div class="text-6xl mb-6 transition-all" id="conductivityIcon">💡</div>
-          <button id="conductivityBtn" class="bg-yellow-300 text-sky-900 w-full font-black py-3 rounded-xl disabled:opacity-40" disabled>通電檢測</button>
+          <button id="conductivityBtn" class="bg-yellow-300 text-sky-900 w-full font-black py-3 rounded-xl disabled:opacity-40 mb-3" disabled>通電檢測</button>
+          <p id="condText" class="text-xs font-bold text-center h-8 info-text"></p>
         </div>
       </div>
      </div>
@@ -125,38 +126,21 @@
     <section id="match-page" class="page-section">
       <div class="glass rounded-3xl p-8">
         <h2 class="text-2xl font-black mb-6 text-yellow-300">性質歸類練習</h2>
-        <p class="text-sky-200 text-sm mb-4">提示：將標籤拖曳至正確的酸鹼區，再嘗試拖曳至正確的導電區</p>
         <div id="matchPool" class="flex flex-wrap gap-3 justify-center mb-8 min-h-[80px] p-4 bg-sky-950/40 rounded-2xl"></div>
-        
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div class="space-y-4">
-            <h3 class="font-black text-sky-200 flex items-center gap-2"><i data-lucide="droplets"></i> A. 酸鹼性質</h3>
+            <h3 class="font-black text-sky-200 flex items-center gap-2"><i data-lucide="droplets"></i> 酸鹼性質</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="ph" data-type="acid">
-                <h4 class="text-center text-xs font-black text-red-300 mb-2">🔴 酸性</h4>
-                <div class="match-items flex flex-wrap gap-1 justify-center"></div>
-              </div>
-              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="ph" data-type="neutral">
-                <h4 class="text-center text-xs font-black text-green-300 mb-2">⚪ 中性</h4>
-                <div class="match-items flex flex-wrap gap-1 justify-center"></div>
-              </div>
-              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="ph" data-type="base">
-                <h4 class="text-center text-xs font-black text-blue-300 mb-2">🔵 鹼性</h4>
-                <div class="match-items flex flex-wrap gap-1 justify-center"></div>
-              </div>
+              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="ph" data-type="acid"><h4 class="text-center text-xs font-black text-red-300 mb-2">🔴 酸性</h4><div class="match-items flex flex-wrap gap-1 justify-center"></div></div>
+              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="ph" data-type="neutral"><h4 class="text-center text-xs font-black text-green-300 mb-2">⚪ 中性</h4><div class="match-items flex flex-wrap gap-1 justify-center"></div></div>
+              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="ph" data-type="base"><h4 class="text-center text-xs font-black text-blue-300 mb-2">🔵 鹼性</h4><div class="match-items flex flex-wrap gap-1 justify-center"></div></div>
             </div>
           </div>
           <div class="space-y-4">
-            <h3 class="font-black text-sky-200 flex items-center gap-2"><i data-lucide="zap"></i> B. 導電性質</h3>
+            <h3 class="font-black text-sky-200 flex items-center gap-2"><i data-lucide="zap"></i> 導電性質</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="cond" data-type="yes">
-                <h4 class="text-center text-xs font-black text-yellow-300 mb-2">💡 可導電</h4>
-                <div class="match-items flex flex-wrap gap-1 justify-center"></div>
-              </div>
-              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="cond" data-type="no">
-                <h4 class="text-center text-xs font-black text-gray-400 mb-2">⚫ 不導電</h4>
-                <div class="match-items flex flex-wrap gap-1 justify-center"></div>
-              </div>
+              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="cond" data-type="yes"><h4 class="text-center text-xs font-black text-yellow-300 mb-2">💡 可導電</h4><div class="match-items flex flex-wrap gap-1 justify-center"></div></div>
+              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="cond" data-type="no"><h4 class="text-center text-xs font-black text-gray-400 mb-2">⚫ 不導電</h4><div class="match-items flex flex-wrap gap-1 justify-center"></div></div>
             </div>
           </div>
         </div>
@@ -217,16 +201,19 @@ function initGrids() {
     const card = document.createElement('button');
     card.className = 'sol-card glass rounded-2xl p-4 hover:bg-white/15 transition-all';
     card.innerHTML = `<div class="beaker mx-auto mb-2" style="--liq:${sol.color}"></div><div class="font-black text-sm">${sol.emoji} ${sol.name}</div>`;
-    
     const labCard = card.cloneNode(true);
     labCard.onclick = () => {
       selectedSol = sol;
       document.querySelectorAll('#solutionGrid .sol-card').forEach(c => c.classList.remove('outline', 'outline-yellow-400'));
       labCard.classList.add('outline', 'outline-yellow-400');
+      ['litmusText', 'cabbageText', 'condText'].forEach(id => document.getElementById(id).textContent = '');
       ['testBtn', 'cabbageBtn', 'conductivityBtn'].forEach(id => document.getElementById(id).disabled = false);
+      document.getElementById('litmusPaper').className = 'litmus mb-4';
+      document.getElementById('cabbageBeaker').style.setProperty('--liq', '#9333ea');
+      document.getElementById('conductivityIcon').textContent = '💡';
+      document.getElementById('conductivityIcon').style.filter = 'none';
     };
     labGrid.appendChild(labCard);
-
     const compCard = card.cloneNode(true);
     compCard.onclick = () => {
       document.getElementById('compPlaceholder').classList.add('hidden');
@@ -251,11 +238,7 @@ function initPropMatch() {
     tag.className = 'bg-white/10 px-4 py-2 rounded-xl font-bold cursor-grab hover:bg-white/20 border border-white/5';
     tag.draggable = true;
     tag.textContent = s.emoji + ' ' + s.name;
-    tag.ondragstart = (e) => e.dataTransfer.setData('text/plain', JSON.stringify({
-      text: s.name, 
-      ph: s.ph, 
-      cond: s.cond 
-    }));
+    tag.ondragstart = (e) => e.dataTransfer.setData('text/plain', JSON.stringify({ text: s.name, ph: s.ph, cond: s.cond, emoji: s.emoji }));
     pool.appendChild(tag);
   });
 }
@@ -267,17 +250,17 @@ function initCompMatch() {
   const tasks = [];
   solutions.forEach(s => {
     if(s.id !== 'water') {
-      tasks.push({ text: s.name, type: 'solution' });
-      tasks.push({ text: s.solute, type: 'solute' });
+      tasks.push({ text: s.name, type: 'solution', emoji: s.emoji });
+      tasks.push({ text: s.solute, type: 'solute', emoji: s.sEmoji });
     }
   });
-  tasks.push({ text: '水', type: 'solvent' });
+  tasks.push({ text: '水', type: 'solvent', emoji: '💧' });
   tasks.sort(() => Math.random() - 0.5).forEach(task => {
     const tag = document.createElement('div');
     tag.className = 'bg-white/10 px-4 py-2 rounded-xl font-bold cursor-grab hover:bg-white/20 border border-white/10';
     tag.draggable = true;
-    tag.textContent = task.text;
-    tag.ondragstart = (e) => e.dataTransfer.setData('text/plain', JSON.stringify({text: task.text, type: task.type, group: 'role'}));
+    tag.innerHTML = `<span>${task.emoji}</span> <span>${task.text}</span>`;
+    tag.ondragstart = (e) => e.dataTransfer.setData('text/plain', JSON.stringify({text: task.text, type: task.type, group: 'role', emoji: task.emoji}));
     pool.appendChild(tag);
   });
 }
@@ -289,20 +272,17 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
     e.preventDefault();
     zone.classList.remove('over');
     const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-    const group = zone.dataset.group; // 'ph', 'cond', or 'role'
+    const group = zone.dataset.group;
     const targetType = zone.dataset.type;
-
     const isCorrect = (group === 'role' && data.type === targetType) || 
                       (group === 'ph' && data.ph === targetType) || 
                       (group === 'cond' && data.cond === targetType);
-
     if (isCorrect) {
       const itemsContainer = zone.querySelector('.match-items');
-      if ([...itemsContainer.children].some(c => c.textContent === data.text)) return;
-      
+      if ([...itemsContainer.children].some(c => c.textContent.includes(data.text))) return;
       const chip = document.createElement('div');
       chip.className = 'bg-white/20 px-2 py-1 rounded text-[10px] font-bold pop border border-white/10';
-      chip.textContent = data.text;
+      chip.innerHTML = `${data.emoji} ${data.text}`;
       itemsContainer.appendChild(chip);
     } else {
       zone.classList.add('shake', 'bg-red-500/20');
@@ -311,31 +291,36 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
   };
 });
 
-document.getElementById('conductivityBtn').onclick = () => {
-  const icon = document.getElementById('conductivityIcon');
-  if(selectedSol.cond === 'yes') {
-    icon.textContent = '💡✨';
-    icon.style.filter = 'drop-shadow(0 0 15px #fde047)';
-  } else {
-    icon.textContent = '⚫';
-    icon.style.filter = 'none';
-  }
-  icon.classList.add('pop');
-  setTimeout(() => icon.classList.remove('pop'), 400);
-};
-
 document.getElementById('testBtn').onclick = () => {
   const p = document.getElementById('litmusPaper');
-  p.className = 'litmus mb-4 ' + (selectedSol.ph === 'acid' ? 'red-result' : selectedSol.ph === 'base' ? 'blue-result' : '');
-  p.classList.add('shake');
-  setTimeout(() => p.classList.remove('shake'), 400);
+  const t = document.getElementById('litmusText');
+  let res = "";
+  if (selectedSol.ph === 'acid') { p.className = 'litmus mb-4 red-result'; res = "變為紅色，此溶液呈酸性"; t.className = "text-xs font-bold text-center h-8 info-text text-red-400"; }
+  else if (selectedSol.ph === 'base') { p.className = 'litmus mb-4 blue-result'; res = "變為藍色，此溶液呈鹼性"; t.className = "text-xs font-bold text-center h-8 info-text text-blue-400"; }
+  else { p.className = 'litmus mb-4'; res = "不變色，此溶液呈中性"; t.className = "text-xs font-bold text-center h-8 info-text text-green-400"; }
+  t.textContent = res; p.classList.add('shake'); setTimeout(() => p.classList.remove('shake'), 400);
 };
 
 document.getElementById('cabbageBtn').onclick = () => {
   const b = document.getElementById('cabbageBeaker');
+  const t = document.getElementById('cabbageText');
   b.style.setProperty('--liq', selectedSol.cabbage);
-  b.classList.add('pop');
-  setTimeout(() => b.classList.remove('pop'), 400);
+  let res = selectedSol.ph === 'acid' ? "變為偏紅色系 (酸性)" : (selectedSol.ph === 'base' ? "變為偏綠色系 (鹼性)" : "維持紫色 (中性)");
+  t.className = `text-xs font-bold text-center h-8 info-text ${selectedSol.ph==='acid'?'text-red-400':(selectedSol.ph==='base'?'text-green-400':'text-purple-400')}`;
+  t.textContent = res; b.classList.add('pop'); setTimeout(() => b.classList.remove('pop'), 400);
+};
+
+document.getElementById('conductivityBtn').onclick = () => {
+  const icon = document.getElementById('conductivityIcon');
+  const t = document.getElementById('condText');
+  if(selectedSol.cond === 'yes') {
+    icon.textContent = '💡✨'; icon.style.filter = 'drop-shadow(0 0 15px #fde047)';
+    t.textContent = "燈泡發光，此溶液可導電 (電解質)"; t.className = "text-xs font-bold text-center h-8 info-text text-yellow-300";
+  } else {
+    icon.textContent = '⚫'; icon.style.filter = 'none';
+    t.textContent = "燈泡不亮，此溶液不導電 (非電解質)"; t.className = "text-xs font-bold text-center h-8 info-text text-gray-400";
+  }
+  icon.classList.add('pop'); setTimeout(() => icon.classList.remove('pop'), 400);
 };
 
 window.onload = () => { initGrids(); initPropMatch(); lucide.createIcons(); };
