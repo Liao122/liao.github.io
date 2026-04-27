@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="zh-TW" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>互動溶解實驗室</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;family=Noto+Sans+TC:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+  <style>
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+    background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #dbeafe 100%);
+    overflow: auto;
+  }
+  .lab-wrapper { width: 100%; min-height: 100%; }
+  
+@keyframes liquidSwirl {
+  0% { transform: rotate(0deg) scaleX(1); }
+  50% { transform: rotate(8deg) scaleX(1.05); }
+  100% { transform: rotate(0deg) scaleX(1); }
+}
+
+@keyframes vortexIn {
+  0% {
+    transform: translate(0,0) scale(1);
+  }
+  40% {
+    transform: translate(20px,40px) scale(0.8);
+  }
+  70% {
+    transform: translate(-10px,70px) scale(0.5);
+  }
+  100% {
+    transform: translate(0,90px) scale(0.2);
+  }
+}
+
+@keyframes stirSpeed {
+  0% { transform: translate(-50%, -50%) rotate(0deg) translateX(30px) rotate(0deg); }
+  30% { transform: translate(-50%, -50%) rotate(360deg) translateX(30px) rotate(-360deg); }
+  70% { transform: translate(-50%, -50%) rotate(1080deg) translateX(30px) rotate(-1080deg); }
+  100% { transform: translate(-50%, -50%) rotate(1440deg) translateX(30px) rotate(-1440deg); }
+}
+
+.liquid::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: radial-gradient(circle, rgba(255,255,255,0.6) 20%, transparent 70%);
+  animation: ripple 1.2s infinite;
+}
+
+@keyframes ripple {
+  0% { transform: scaleX(1); opacity: 0.7; }
+  50% { transform: scaleX(1.1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0.7; }
+}
+
+  .beaker {
+    position: relative;
+    width: 220px;
+    height: 280px;
+    margin: 0 auto;
+    border: 6px solid #94a3b8;
+    border-top: none;
+    border-radius: 0 0 30px 30px;
+    background: rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.1), 0 10px 30px rgba(0,0,0,0.15);
+  }
+  .beaker::before {
+    content: '';
+    position: absolute;
+    top: -6px; left: -14px; right: -14px;
+    height: 6px;
+    background: #94a3b8;
+    border-radius: 3px;
+  }
+  .liquid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 75%;
+    transition: background 1.5s ease, filter 0.5s ease;
+    background: rgba(186, 230, 253, 0.6);
+  }
+  .liquid::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 10px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50%;
+    animation: wave 3s ease-in-out infinite;
+  }
+  @keyframes wave {
+    0%, 100% { transform: translateY(0) scaleX(1); }
+    50% { transform: translateY(-2px) scaleX(1.02); }
+  }
+  
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  
+  @keyframes fallAndDissolve {
+    0% { top: -40px; opacity: 1; transform: scale(1); }
+    40% { top: 50%; opacity: 1; transform: scale(1); }
+    70% { opacity: 0.5; transform: scale(0.6); }
+    100% { top: 70%; opacity: 0; transform: scale(0.2); }
+  }
+  @keyframes fallAndSink {
+    0% { top: -40px; opacity: 1; transform: scale(1) rotate(0deg); }
+    100% { top: calc(100% - 20px); opacity: 1; transform: scale(1) rotate(360deg); }
+  }
+  @keyframes floatDrift {
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    25% { transform: translate(8px, -5px) rotate(90deg); }
+    50% { transform: translate(-5px, 8px) rotate(180deg); }
+    75% { transform: translate(-8px, -3px) rotate(270deg); }
+  }
+  @keyframes swirlIntoBeaker {
+    0% { 
+      opacity: 0; 
+      transform: translate(-100px, -100px) scale(0.3) rotate(-180deg);
+    }
+    50% { 
+      opacity: 1; 
+      transform: translate(-20px, -50px) scale(1) rotate(-90deg);
+    }
+    100% { 
+      opacity: 1; 
+      transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+  }
+@keyframes particleSpiral {
+  0% {
+    transform: rotate(0deg) translateX(0) translateY(0) scale(1);
+  }
+  25% {
+    transform: rotate(90deg) translateX(30px) translateY(10px) scale(0.9);
+  }
+  50% {
+    transform: rotate(180deg) translateX(0) translateY(20px) scale(0.85);
+  }
+  75% {
+    transform: rotate(270deg) translateX(-30px) translateY(10px) scale(0.9);
+  }
+  100% {
+    transform: rotate(360deg) translateX(0) translateY(0) scale(1);
+  }
+}
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+  
+  .solute-btn {
+    transition: all 0.2s ease;
+  }
+  .solute-btn:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.03);
+  }
+  .solute-btn.selected {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 4px #fbbf24, 0 8px 20px rgba(0,0,0,0.15);
+  }
+  .solute-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  .bubble {
+    position: absolute;
+    bottom: 0;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    animation: bubbleUp 2s linear infinite;
+  }
+  @keyframes bubbleUp {
+    0% { bottom: 0; opacity: 0; }
+    20% { opacity: 1; }
+    100% { bottom: 100%; opacity: 0; }
+  }
+  
+  .stir-animation {
+    animation: stirRotate 1s linear infinite;
+  }
+  @keyframes stirRotate {
+    0% { transform: translate(-50%, -50%) rotate(0deg) translateX(30px) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg) translateX(30px) rotate(-360deg); }
+  }
+  
+  .concept-card {
+    transition: all 0.3s ease;
+    animation: cardFadeIn 0.6s ease both;
+  }
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .sparkle {
+    position: absolute;
+    pointer-events: none;
+    animation: sparkleFade 1s ease forwards;
+  }
+  @keyframes sparkleFade {
+    0% { opacity: 1; transform: scale(0) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(180deg); }
+    100% { opacity: 0; transform: scale(0.5) rotate(360deg); }
+  }
+  
+  .sorting-item {
+    cursor: grab;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .sorting-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+  }
+  .sorting-item:hover {
+    transform: scale(1.05);
+  }
+  
+  .sorting-zone {
+    min-height: 120px;
+    border: 3px dashed;
+    border-radius: 2xl;
+    padding: 1rem;
+    transition: all 0.2s ease;
+  }
+  .sorting-zone.drag-over {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 3px;
+  }
+  
+  .sorting-item-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border-radius: 1.5rem;
+    font-weight: bold;
+    cursor: grab;
+    transition: all 0.2s ease;
+    margin: 0.5rem 0.25rem;
+  }
+  .sorting-item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .sorting-item-card.dragging {
+    opacity: 0.6;
+    cursor: grabbing;
+  }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="lab-wrapper">
+   <main class="max-w-7xl mx-auto px-4 py-6"><!-- Header -->
+    <header class="text-center mb-6">
+     <h1 id="lab-title" class="text-4xl md:text-5xl font-black text-slate-800 mb-2" style="font-family: 'Noto Sans TC', sans-serif;">互動溶解實驗室</h1>
+     <p id="lab-subtitle" class="text-slate-600 text-lg">動手做實驗,認識溶液、溶劑與溶質!</p>
+    </header>
+    <div class="grid lg:grid-cols-3 gap-6"><!-- Left: Controls -->
+     <section class="lg:col-span-1 space-y-4"><!-- Step 1: Solvent -->
+      <div class="bg-white rounded-3xl p-5 shadow-lg border-4 border-blue-200">
+       <div class="flex items-center gap-2 mb-3"><span class="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</span>
+        <h3 class="font-bold text-lg text-slate-800">溶劑 💧</h3>
+       </div>
+       <p class="text-xs text-slate-500 mb-3">溶劑 = 用來溶解東西的液體</p>
+       <div class="bg-blue-100 rounded-2xl p-4 text-center border-2 border-blue-400">
+        <div class="text-3xl mb-2">
+         💧
+        </div>
+        <div class="font-bold text-slate-700">
+         水
+        </div>
+       </div>
+      </div><!-- Step 2: Solute -->
+      <div class="bg-white rounded-3xl p-5 shadow-lg border-4 border-pink-200">
+       <div class="flex items-center gap-2 mb-3"><span class="bg-pink-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</span>
+        <h3 class="font-bold text-lg text-slate-800">加入溶質 🧂</h3>
+       </div>
+       <p class="text-xs text-slate-500 mb-3">溶質 = 被溶解的物質</p>
+       <div class="grid grid-cols-2 gap-2" id="solute-list"></div>
+      </div><!-- Step 3: Stir -->
+      <div class="bg-white rounded-3xl p-5 shadow-lg border-4 border-orange-200">
+       <div class="flex items-center gap-2 mb-3"><span class="bg-orange-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</span>
+        <h3 class="font-bold text-lg text-slate-800">開始實驗 🌀</h3>
+       </div><button id="stir-btn" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl py-3 font-bold shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"> <i data-lucide="refresh-cw"></i> 攪拌看看! </button>
+      </div><!-- Reset --> <button id="reset-btn" class="w-full bg-white hover:bg-slate-50 text-slate-700 rounded-2xl py-3 font-bold shadow border-2 border-slate-200 flex items-center justify-center gap-2"> <i data-lucide="rotate-ccw" style="width:18px;height:18px;"></i> 重新開始 </button>
+     </section><!-- Middle: Beaker -->
+     <section class="lg:col-span-1">
+      <div class="bg-gradient-to-b from-sky-50 to-white rounded-3xl p-6 shadow-xl border-4 border-sky-200 h-full flex flex-col">
+       <h3 class="text-center font-bold text-slate-700 mb-4 flex items-center justify-center gap-2"><i data-lucide="flask-conical" style="color:#0ea5e9;"></i> 實驗燒杯</h3>
+       <div class="flex-1 flex items-center justify-center">
+        <div class="beaker" id="beaker">
+         <div class="liquid" id="liquid"></div>
+         <div id="particles"></div>
+         <div id="bubbles"></div>
+         <div id="stirrer" class="hidden absolute" style="top:50%;left:50%;width:8px;height:80px;background:#64748b;border-radius:4px;transform-origin:center;z-index:10;"></div>
+        </div>
+       </div><!-- Status -->
+       <div id="status-box" class="mt-4 bg-slate-50 rounded-2xl p-4 border-2 border-slate-200">
+        <div class="text-xs text-slate-500 mb-1">
+         目前狀態
+        </div>
+        <div id="status-text" class="font-bold text-slate-700">
+         請選擇溶質開始實驗 ✨
+        </div>
+       </div>
+      </div>
+     </section><!-- Right: Learning -->
+     <section class="lg:col-span-1 space-y-4"><!-- Concepts -->
+      <div class="bg-white rounded-3xl p-5 shadow-lg border-4 border-purple-200">
+       <h3 id="concept-title" class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="book-open" style="color:#a855f7;"></i> 學習小百科</h3>
+       <div class="space-y-2">
+        <div class="concept-card bg-blue-50 rounded-2xl p-3 border-l-4 border-blue-400">
+         <div class="font-bold text-blue-700 text-sm">
+          💧 溶劑 (Solvent)
+         </div>
+         <div class="text-xs text-slate-600 mt-1">
+          能溶解其他物質的液體,例如:水
+         </div>
+        </div>
+        <div class="concept-card bg-pink-50 rounded-2xl p-3 border-l-4 border-pink-400" style="animation-delay:0.1s">
+         <div class="font-bold text-pink-700 text-sm">
+          🧂 溶質 (Solute)
+         </div>
+         <div class="text-xs text-slate-600 mt-1">
+          被溶解的物質,例如:糖、鹽
+         </div>
+        </div>
+        <div class="concept-card bg-green-50 rounded-2xl p-3 border-l-4 border-green-400" style="animation-delay:0.2s">
+         <div class="font-bold text-green-700 text-sm">
+          🥤 溶液 (Solution)
+         </div>
+         <div class="text-xs text-slate-600 mt-1">
+          溶質 + 溶劑混合後,形成均勻的液體
+         </div>
+        </div>
+        <div class="concept-card bg-yellow-50 rounded-2xl p-3 border-l-4 border-yellow-400" style="animation-delay:0.3s">
+         <div class="font-bold text-yellow-700 text-sm">
+          ✨ 溶解
+         </div>
+         <div class="text-xs text-slate-600 mt-1">
+          溶質在溶劑中慢慢消失、均勻分布的現象
+         </div>
+        </div>
+       </div>
+      </div><!-- Observation -->
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-5 shadow-lg border-4 border-amber-200">
+       <h3 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2"><i data-lucide="lightbulb" style="color:#f59e0b;"></i> 你發現了嗎?</h3>
+       <div id="observations" class="space-y-2 text-sm text-slate-700">
+        <div class="text-slate-400 italic text-center py-4">
+         完成實驗後會顯示發現 🔍
+        </div>
+       </div>
+      </div>
+     </section>
+    </div><!-- Sorting Game -->
+    <section class="mt-6 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-3xl p-6 shadow-xl text-white">
+     <div class="flex items-center gap-3 mb-4">
+      <div class="bg-white/20 rounded-full p-2"><i data-lucide="hand-grabbing"></i>
+      </div>
+      <h3 id="sorting-title" class="font-bold text-xl">物質分類遊戲</h3>
+     </div>
+     <p class="text-sm mb-4 opacity-90">拖拉物質到適合的區域,看看什麼可以溶解吧! 💧</p>
+     <div class="grid md:grid-cols-2 gap-4">
+      <div class="sorting-zone bg-green-400/30 border-green-200" data-answer="yes">
+       <div class="font-bold text-lg mb-2">
+        ✅ 可以溶於水
+       </div>
+       <div id="zone-yes" class="min-h-20"></div>
+      </div>
+      <div class="sorting-zone bg-red-400/30 border-red-200" data-answer="no">
+       <div class="font-bold text-lg mb-2">
+        ❌ 不能溶於水
+       </div>
+       <div id="zone-no" class="min-h-20"></div>
+      </div>
+     </div>
+     <div class="mt-4 p-4 bg-white/10 rounded-2xl">
+      <div class="flex items-center justify-between mb-2">
+       <div class="font-bold">
+        📦 物質庫
+       </div><button id="refresh-sorting-btn" class="bg-white/20 hover:bg-white/30 text-white rounded-lg px-3 py-1 text-sm font-bold transition"> 🔄 重新整理 </button>
+      </div>
+      <div id="sorting-items" class="flex flex-wrap gap-2"></div>
+     </div>
+    </section>
+   </main>
+  </div>
+  <script>
+
+const solutes = [
+  { id: 'sugar', name: '糖', emoji: '🍬', color: '#fef3c7', dissolvesInWater: true, particleColor: '#fbbf24' },
+  { id: 'salt', name: '鹽', emoji: '🧂', color: '#f1f5f9', dissolvesInWater: true, particleColor: '#cbd5e1' },
+  { id: 'sand', name: '沙子', emoji: '🏖️', color: '#fde68a', dissolvesInWater: false, particleColor: '#d97706' },
+  { id: 'drink', name: '果汁粉', emoji: '🧃', color: '#fecaca', dissolvesInWater: true, particleColor: '#ef4444' },
+  { id: 'flour', name: '麵粉', emoji: '🌾', color: '#fef3c7', dissolvesInWater: false, particleColor: '#fef9c3' },
+  { id: 'coffee', name: '咖啡粉', emoji: '☕', color: '#efe2b0', dissolvesInWater: true, particleColor: '#92400e' },
+  { id: 'sugar_cube', name: '方糖', emoji: '🧈', color: '#fef08a', dissolvesInWater: true, particleColor: '#f59e0b' },
+  { id: 'chalk', name: '粉筆', emoji: '🖍️', color: '#e0e7ff', dissolvesInWater: false, particleColor: '#818cf8' },
+  { id: 'honey', name: '蜂蜜', emoji: '🍯', color: '#fed7aa', dissolvesInWater: true, particleColor: '#ea580c' },
+  { id: 'pebble', name: '小石頭', emoji: '🪨', color: '#d1d5db', dissolvesInWater: false, particleColor: '#6b7280' },
+];
+
+const state = {
+  solvent: 'water',
+  solute: null,
+  stirred: false,
+  dissolved: false,
+  observations: [],
+  draggedItem: null,
+  sortedItems: { yes: [], no: [] },
+  sortingComplete: false,
+};
+
+
+const defaultConfig = {
+  lab_title: '互動溶解實驗室',
+  lab_subtitle: '動手做實驗,認識溶液、溶劑與溶質!',
+  concept_title: '學習小百科',
+  sorting_title: '物質分類遊戲',
+  bg_color: '#fef3c7',
+  surface_color: '#ffffff',
+  text_color: '#1e293b',
+  primary_color: '#a855f7',
+  accent_color: '#ec4899',
+};
+
+function onConfigChange(config) {
+  document.getElementById('lab-title').textContent = config.lab_title || defaultConfig.lab_title;
+  document.getElementById('lab-subtitle').textContent = config.lab_subtitle || defaultConfig.lab_subtitle;
+  const ct = document.getElementById('concept-title');
+  const icon = ct.querySelector('i') ? ct.querySelector('i').outerHTML : '';
+  ct.innerHTML = icon + (config.concept_title || defaultConfig.concept_title);
+  
+  const st = document.getElementById('sorting-title');
+  const sortIcon = st.querySelector('i') ? st.querySelector('i').outerHTML : '';
+  st.innerHTML = sortIcon + (config.sorting_title || defaultConfig.sorting_title);
+  
+  lucide.createIcons();
+  
+  document.body.style.color = config.text_color || defaultConfig.text_color;
+}
+
+if (window.elementSdk) {
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange,
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.bg_color || defaultConfig.bg_color, set: v => { config.bg_color = v; window.elementSdk.setConfig({ bg_color: v }); }},
+        { get: () => config.surface_color || defaultConfig.surface_color, set: v => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }},
+        { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
+        { get: () => config.primary_color || defaultConfig.primary_color, set: v => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }},
+        { get: () => config.accent_color || defaultConfig.accent_color, set: v => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }},
+      ],
+      borderables: [],
+      fontEditable: undefined,
+      fontSizeable: undefined,
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ['lab_title', config.lab_title || defaultConfig.lab_title],
+      ['lab_subtitle', config.lab_subtitle || defaultConfig.lab_subtitle],
+      ['concept_title', config.concept_title || defaultConfig.concept_title],
+      ['sorting_title', config.sorting_title || defaultConfig.sorting_title],
+    ]),
+  });
+}
+
+// ========== Render Solute Buttons ==========
+const soluteList = document.getElementById('solute-list');
+solutes.forEach(s => {
+  const btn = document.createElement('button');
+  btn.className = 'solute-btn rounded-2xl p-3 text-sm font-bold border-2 border-transparent';
+  btn.style.background = s.color;
+  btn.dataset.solute = s.id;
+  btn.innerHTML = `<div class="text-2xl mb-1">${s.emoji}</div>${s.name}`;
+  btn.addEventListener('click', () => selectSolute(s.id, btn));
+  soluteList.appendChild(btn);
+});
+
+
+function renderSortingItems() {
+  const box = document.getElementById('sorting-items');
+  box.innerHTML = '';
+  solutes.forEach(s => {
+
+    if (state.sortedItems.yes.includes(s.id) || state.sortedItems.no.includes(s.id)) {
+      return;
+    }
+    
+    const card = document.createElement('div');
+    card.className = 'sorting-item-card bg-white text-slate-800';
+    card.draggable = true;
+    card.dataset.solute = s.id;
+    card.innerHTML = `${s.emoji} ${s.name}`;
+    
+    card.addEventListener('dragstart', (e) => {
+      state.draggedItem = s.id;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      state.draggedItem = null;
+    });
+    
+    box.appendChild(card);
+  });
+}
+
+document.querySelectorAll('.sorting-zone').forEach(zone => {
+  zone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    zone.classList.add('drag-over');
+    e.dataTransfer.dropEffect = 'move';
+  });
+  
+  zone.addEventListener('dragleave', () => {
+    zone.classList.remove('drag-over');
+  });
+  
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    
+    if (!state.draggedItem) return;
+    
+    const answer = zone.dataset.answer;
+    const solute = solutes.find(s => s.id === state.draggedItem);
+    const zoneContent = zone.querySelector(`#zone-${answer}`);
+
+    if (state.sortedItems.yes.includes(state.draggedItem) || state.sortedItems.no.includes(state.draggedItem)) {
+      return;
+    }
+
+    const isCorrect = (solute.dissolvesInWater && answer === 'yes') || (!solute.dissolvesInWater && answer === 'no');
+
+    if (!isCorrect) {
+      zone.style.animation = 'shake 0.4s ease';
+      setTimeout(() => {
+        zone.style.animation = '';
+      }, 400);
+      return;
+    }
+
+    state.sortedItems[answer].push(state.draggedItem);
+
+    const item = document.createElement('div');
+    item.className = 'sorting-item-card bg-white/80 text-slate-800 mb-2';
+    item.textContent = `${solute.emoji} ${solute.name}`;
+    item.style.cursor = 'default';
+    item.style.pointerEvents = 'none';
+    
+    zoneContent.appendChild(item);
+
+    addSparkles(15);
+    addObservation(`✅ ${solute.emoji} ${solute.name} 分類正確!`);
+    
+    renderSortingItems();
+  });
+});
+
+document.getElementById('refresh-sorting-btn').addEventListener('click', () => {
+  state.sortedItems = { yes: [], no: [] };
+  document.getElementById('zone-yes').innerHTML = '';
+  document.getElementById('zone-no').innerHTML = '';
+  renderSortingItems();
+  updateStatus('物質分類已重新整理 🔄');
+});
+
+function getLiquidColor() {
+  if (state.solvent === 'oil') return 'rgba(254, 240, 138, 0.7)';
+  return 'rgba(186, 230, 253, 0.6)';
+}
+
+function getMixedColor(soluteId) {
+  const map = {
+    sugar: 'rgba(254, 243, 199, 0.75)',
+    salt: 'rgba(226, 232, 240, 0.65)',
+    drink: 'rgba(252, 165, 165, 0.85)',
+    coffee: 'rgba(161, 98, 7, 0.7)',
+    sugar_cube: 'rgba(245, 158, 11, 0.75)',
+    honey: 'rgba(234, 88, 12, 0.8)',
+  };
+  return map[soluteId] || 'rgba(186, 230, 253, 0.6)';
+}
+
+document.querySelectorAll('.solvent-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.solvent-btn').forEach(x => {
+      x.classList.remove('selected', 'bg-blue-100', 'bg-yellow-100', 'border-blue-400', 'border-yellow-400');
+      if (x.dataset.solvent === 'water') x.classList.add('bg-blue-100');
+      else x.classList.add('bg-yellow-50');
+      x.classList.add('border-transparent');
+    });
+    b.classList.add('selected');
+    b.classList.remove('border-transparent');
+    if (b.dataset.solvent === 'water') { b.classList.add('border-blue-400'); }
+    else { b.classList.add('border-yellow-400'); }
+    
+    state.solvent = b.dataset.solvent;
+    resetExperiment(false);
+    document.getElementById('liquid').style.background = getLiquidColor();
+    updateStatus(`已選擇溶劑:${b.dataset.solvent === 'water' ? '水 💧' : '食用油 🫒'}`);
+  });
+});
+
+function selectSolute(id, btn) {
+
+  if (state.solute && !state.stirred) {
+    return;
+  }
+  
+  state.solute = id;
+  state.stirred = false;
+  state.dissolved = false;
+  document.querySelectorAll('.solute-btn').forEach(x => x.classList.remove('selected'));
+  btn.classList.add('selected');
+  
+  const solute = solutes.find(s => s.id === id);
+  dropParticles(solute);
+  updateStatus(`加入了 ${solute.name} ${solute.emoji},點擊「攪拌看看」!`);
+  addSparkles();
+}
+
+function dropParticles(solute) {
+  const container = document.getElementById('particles');
+  container.innerHTML = '';
+  const count = 15;
+  
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 6 + Math.random() * 6;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.background = solute.particleColor;
+    p.style.left = (15 + Math.random() * 70) + '%';
+    p.style.boxShadow = `0 0 4px ${solute.particleColor}`;
+    p.style.animation = `swirlIntoBeaker 0.8s ease-out forwards`;
+    p.style.animationDelay = (i * 0.05) + 's';
+    container.appendChild(p);
+
+    setTimeout(() => {
+      p.style.animation = `fallAndSink 1.2s ease-in ${(i * 0.05)}s forwards`;
+    }, 800);
+  }
+}
+
+document.getElementById('stir-btn').addEventListener('click', () => {
+  if (!state.solute) {
+    updateStatus('請先加入溶質! 🧂');
+    return;
+  }
+  stir();
+});
+
+function stir() {
+  const stirrer = document.getElementById('stirrer');
+  stirrer.classList.remove('hidden');
+  stirrer.style.animation = 'stirRotate 0.6s linear 4'; 
+  
+  const solute = solutes.find(s => s.id === state.solute);
+  const willDissolve = solute.dissolvesInWater;
+  const container = document.getElementById('particles');
+  const liquid = document.getElementById('liquid');
+  
+  [...container.children].forEach((p, i) => {
+    const stirBaseHeight = 55 + Math.random() * 30; 
+    p.style.top = `${stirBaseHeight}%`;
+    p.style.animation = `particleSpiral 0.8s ease-in-out infinite`;
+    p.style.animationDelay = (i * 0.05) + 's';
+  });
+  
+  const duration = 2400; 
+  updateStatus(`正在攪拌中... 🌀`);
+  
+  setTimeout(() => {
+    stirrer.classList.add('hidden');
+    state.stirred = true;
+    
+    if (willDissolve) {
+      [...container.children].forEach((p, i) => {
+        p.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        setTimeout(() => {
+          p.style.opacity = '0';
+          p.style.transform = 'scale(0.2)';
+        }, i * 30);
+      });
+      setTimeout(() => {
+        container.innerHTML = '';
+        liquid.style.background = getMixedColor(state.solute);
+        state.dissolved = true;
+        updateStatus(`✨ ${solute.name} 完全溶解了!形成了溶液 🥤`);
+        addObservation(`${solute.emoji} ${solute.name} 溶於水,形成均勻的溶液。這是「溶解」現象!`);
+        addSparkles(20);
+      }, 800);
+    } else {
+      [...container.children].forEach((p, i) => {
+        p.style.animation = 'none';
+        p.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+
+        setTimeout(() => {
+          p.style.top = (90 + Math.random() * 5) + '%';
+          p.style.left = (20 + Math.random() * 60) + '%';
+          p.style.opacity = '0.8';
+        }, i * 20);
+      });
+      updateStatus(`😮 ${solute.name} 沒有溶解,沉在杯底!`);
+      addObservation(`${solute.emoji} ${solute.name} 不溶於水,所以看不到溶解現象。`);
+    }
+  }, duration);
+}
+
+function addObservation(text) {
+  if (state.observations.includes(text)) return;
+  state.observations.push(text);
+  const box = document.getElementById('observations');
+  if (state.observations.length === 1) box.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = 'bg-white rounded-xl p-3 shadow-sm border-l-4 border-amber-400 concept-card';
+  div.textContent = text;
+  box.appendChild(div);
+}
+
+function addSparkles(count = 8) {
+  const beaker = document.getElementById('beaker');
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = ['✨','⭐','💫'][Math.floor(Math.random()*3)];
+    s.style.fontSize = (12 + Math.random() * 12) + 'px';
+    s.style.left = (Math.random() * 100) + '%';
+    s.style.top = (30 + Math.random() * 60) + '%';
+    s.style.animationDelay = (Math.random() * 0.5) + 's';
+    beaker.appendChild(s);
+    setTimeout(() => s.remove(), 1500);
+  }
+}
+
+function updateStatus(text) {
+  document.getElementById('status-text').textContent = text;
+}
+
+function resetExperiment(full = true) {
+  state.solute = null;
+  state.stirred = false;
+  state.dissolved = false;
+  document.getElementById('particles').innerHTML = '';
+  document.getElementById('liquid').style.background = getLiquidColor();
+  document.querySelectorAll('.solute-btn').forEach(x => x.classList.remove('selected'));
+  if (full) {
+    state.observations = [];
+    document.getElementById('observations').innerHTML = '<div class="text-slate-400 italic text-center py-4">完成實驗後會顯示發現 🔍</div>';
+    updateStatus('請選擇溶質開始實驗 ✨');
+  }
+}
+
+document.getElementById('reset-btn').addEventListener('click', () => resetExperiment(true));
+
+lucide.createIcons();
+document.getElementById('liquid').style.background = getLiquidColor();
+renderSortingItems();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f2c6c1016108f24',t:'MTc3NzI3ODE3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
