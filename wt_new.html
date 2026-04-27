@@ -20,396 +20,329 @@
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(255,255,255,0.15);
   }
+  /* 頁面切換動畫優化 */
+  .page-section { display: none; opacity: 0; transform: translateY(15px); }
+  .page-section.active { 
+    display: block; 
+    animation: fadeInSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  @keyframes fadeInSlide {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 導覽按鈕顏色切換優化 */
+  .nav-btn { 
+    background: rgba(12, 74, 110, 0.6); 
+    color: white; 
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .nav-btn.active { 
+    background: #fde047 !important; 
+    color: #0c4a6e !important; 
+    box-shadow: 0 4px 12px rgba(253, 224, 71, 0.4);
+    transform: translateY(-2px);
+  }
+
+  /* 燒杯與實驗組件 */
   .beaker {
-    width: 110px;
-    height: 140px;
-    position: relative;
-    border: 4px solid rgba(255,255,255,0.7);
-    border-top: none;
+    width: 110px; height: 140px; position: relative;
+    border: 4px solid rgba(255,255,255,0.7); border-top: none;
     border-radius: 0 0 22px 22px;
     background: linear-gradient(to bottom, transparent 0%, transparent 25%, var(--liq, #38bdf8) 25%, var(--liq, #38bdf8) 100%);
     box-shadow: inset 0 -10px 30px rgba(0,0,0,0.25), 0 10px 25px rgba(0,0,0,0.3);
     overflow: hidden;
   }
-  .beaker::before {
-    content: "";
-    position: absolute;
-    top: 25%;
-    left: 0;
-    right: 0;
-    height: 10px;
-    background: rgba(255,255,255,0.35);
-    border-radius: 50%;
-    animation: ripple 3s ease-in-out infinite;
-  }
-  .beaker::after {
-    content: "";
-    position: absolute;
-    top: -4px;
-    left: -8px;
-    right: -8px;
-    height: 8px;
-    background: rgba(255,255,255,0.7);
-    border-radius: 4px;
-  }
-  @keyframes ripple {
-    0%, 100% { transform: translateY(0) scaleX(1); opacity: 0.35; }
-    50% { transform: translateY(-3px) scaleX(0.95); opacity: 0.55; }
-  }
-  .sol-card:hover .beaker { transform: scale(1.05) rotate(-2deg); transition: 0.3s; }
-  .sol-card.selected { outline: 3px solid #fde047; outline-offset: 4px; }
-  
-  .nav-btn.active { background: #fde047; color: #0c4a6e; box-shadow: 0 6px 0 #ca8a04; }
-  .page-section { display: none; }
-  .page-section.active { display: block; }
-  .pop { animation: pop 0.4s ease; }
-  @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-  .shake { animation: shake 0.4s; }
-  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-  
-  .btn-yellow { background: #fde047; color: #0c4a6e; box-shadow: 0 6px 0 #ca8a04; transition: all 0.15s; }
-  .btn-yellow:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #ca8a04; }
-  .btn-yellow:active { transform: translateY(4px); box-shadow: 0 2px 0 #ca8a04; }
-  
-  .drop-zone { border: 3px dashed rgba(255,255,255,0.4); transition: all 0.2s; }
-  .drop-zone.over { border-color: #fde047; background: rgba(253,224,71,0.15); }
-  .drop-zone.correct { border-color: #4ade80; background: rgba(74,222,128,0.2); }
-  .drop-zone.wrong { border-color: #f87171; background: rgba(248,113,113,0.2); }
-  .draggable { cursor: grab; }
   
   .litmus {
-    width: 38px;
-    height: 110px;
-    border-radius: 4px;
+    width: 38px; height: 110px; border-radius: 4px;
     background: linear-gradient(to bottom, #fecaca 0%, #fecaca 50%, #bfdbfe 50%, #bfdbfe 100%);
-    position: relative;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
   .litmus.red-result { background: linear-gradient(to bottom, #fecaca 0%, #fecaca 50%, #ef4444 50%, #dc2626 100%); }
   .litmus.blue-result { background: linear-gradient(to bottom, #3b82f6 0%, #1d4ed8 50%, #bfdbfe 50%, #bfdbfe 100%); }
-  .litmus.neutral-result { background: linear-gradient(to bottom, #fecaca 0%, #fecaca 50%, #bfdbfe 50%, #bfdbfe 100%); }
+  
+  .drop-zone { border: 3px dashed rgba(255,255,255,0.3); transition: all 0.3s; }
+  .drop-zone.over { border-color: #fde047; background: rgba(253,224,71,0.1); }
+  .shake { animation: shake 0.4s; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+  .pop { animation: pop 0.4s ease; }
+  @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 </style>
  </head>
  <body class="h-full w-full">
   <main class="w-full h-full overflow-auto">
    <div class="max-w-6xl mx-auto px-4 py-6 md:py-10">
     <header class="text-center mb-8">
-     <div class="inline-flex items-center gap-3 bg-sky-400/30 text-white px-4 py-1 rounded-full text-sm font-black mb-3">
-      <i data-lucide="flask-conical" class="w-4 h-4"></i> <span>科學觀察模擬器</span>
-     </div>
      <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-2" style="text-shadow: 0 4px 0 rgba(0,0,0,0.25);">水溶液性質觀測站</h1>
-     <p class="text-sky-200 text-base md:text-lg font-bold">指示劑變色反應與物理性質模擬</p>
+     <p class="text-sky-200 text-base md:text-lg font-bold">互動式組成與性質分類教學系統</p>
     </header>
 
-    <nav class="flex flex-wrap justify-center gap-4 mb-6">
-     <button id="toLab" class="nav-btn active font-black px-6 py-3 rounded-2xl bg-yellow-300 text-sky-900 transition-all"> <i data-lucide="test-tube-2" class="w-5 h-5 inline -mt-1"></i> 性質觀察室 </button>
-     <button id="toComposition" class="nav-btn font-black px-6 py-3 rounded-2xl bg-white/10 text-white transition-all hover:bg-white/20"> <i data-lucide="component" class="w-5 h-5 inline -mt-1"></i> 組成比例觀測 </button>
-     <button id="toMatch" class="nav-btn font-black px-6 py-3 rounded-2xl bg-white/10 text-white transition-all hover:bg-white/20"> <i data-lucide="layout-grid" class="w-5 h-5 inline -mt-1"></i> 溶液性質分類 </button>
+    <nav class="flex flex-wrap justify-center gap-4 mb-8">
+     <button onclick="switchPage('lab-page', 'toLab')" id="toLab" class="nav-btn active font-black px-6 py-3 rounded-2xl"> <i data-lucide="test-tube-2" class="w-5 h-5 inline -mt-1"></i> 性質觀察室 </button>
+     <button onclick="switchPage('comp-page', 'toComp')" id="toComp" class="nav-btn font-black px-6 py-3 rounded-2xl"> <i data-lucide="component" class="w-5 h-5 inline -mt-1"></i> 組成比例觀察 </button>
+     <button onclick="switchPage('match-page', 'toMatch')" id="toMatch" class="nav-btn font-black px-6 py-3 rounded-2xl"> <i data-lucide="layout-grid" class="w-5 h-5 inline -mt-1"></i> 性質分類 </button>
+     <button onclick="switchPage('comp-match-page', 'toCompMatch')" id="toCompMatch" class="nav-btn font-black px-6 py-3 rounded-2xl"> <i data-lucide="filter" class="w-5 h-5 inline -mt-1"></i> 組成比例分類 </button>
     </nav>
 
     <section id="lab-page" class="page-section active">
      <div class="glass rounded-3xl p-5 md:p-8">
-      <h2 class="text-xl md:text-2xl font-black mb-4 flex items-center gap-2"><span class="bg-yellow-300 text-sky-900 w-8 h-8 rounded-full inline-flex items-center justify-center">1</span> 選擇待測樣品</h2>
+      <h2 class="text-xl md:text-2xl font-black mb-4 text-yellow-300">1. 選擇待測樣品</h2>
       <div id="solutionGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"></div>
-      
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-sky-950/40 rounded-2xl p-6 flex flex-col items-center">
-          <h3 class="font-bold mb-4 text-sky-200 underline decoration-yellow-400 underline-offset-4">石蕊試紙觀測</h3>
+          <h3 class="font-bold mb-4 text-sky-200">石蕊試紙觀測</h3>
           <div id="litmusPaper" class="litmus mb-4"></div>
-          <button id="testBtn" class="btn-yellow w-full font-black py-3 rounded-xl disabled:opacity-40" disabled>檢測酸鹼</button>
-          <div id="resultBox" class="mt-4 text-xs font-bold text-center hidden"></div>
+          <button id="testBtn" class="bg-yellow-300 text-sky-900 w-full font-black py-3 rounded-xl disabled:opacity-40" disabled>檢測酸鹼</button>
         </div>
-
         <div class="bg-sky-950/40 rounded-2xl p-6 flex flex-col items-center">
-          <h3 class="font-bold mb-4 text-sky-200 underline decoration-purple-400 underline-offset-4">紫色甘藍菜汁測試</h3>
+          <h3 class="font-bold mb-4 text-sky-200">紫色甘藍菜汁</h3>
           <div class="beaker mb-4" id="cabbageBeaker" style="--liq:#9333ea;"></div>
-          <button id="cabbageBtn" class="btn-yellow w-full font-black py-3 rounded-xl disabled:opacity-40" disabled>滴入菜汁</button>
-          <div id="cabbageResultBox" class="mt-4 text-xs font-bold text-center hidden"></div>
+          <button id="cabbageBtn" class="bg-yellow-300 text-sky-900 w-full font-black py-3 rounded-xl disabled:opacity-40" disabled>滴入菜汁</button>
         </div>
-
         <div class="bg-sky-950/40 rounded-2xl p-6 flex flex-col items-center">
-          <h3 class="font-bold mb-4 text-sky-200 underline decoration-blue-400 underline-offset-4">導電性質觀測</h3>
-          <div class="text-6xl mb-6 py-2" id="conductivityIcon">💡</div>
-          <button id="conductivityBtn" class="btn-yellow w-full font-black py-3 rounded-xl disabled:opacity-40" disabled>通電檢測</button>
-          <div id="conductivityResultBox" class="mt-4 text-xs font-bold text-center hidden"></div>
+          <h3 class="font-bold mb-4 text-sky-200">導電性質</h3>
+          <div class="text-6xl mb-6 transition-all" id="conductivityIcon">💡</div>
+          <button id="conductivityBtn" class="bg-yellow-300 text-sky-900 w-full font-black py-3 rounded-xl disabled:opacity-40" disabled>通電檢測</button>
         </div>
-      </div>
-      <div class="mt-8 text-center">
-        <button id="resetBtn" class="bg-white/10 hover:bg-white/20 font-bold px-10 py-2 rounded-2xl text-sm border border-white/20">重置樣品</button>
       </div>
      </div>
     </section>
 
-    <section id="composition-page" class="page-section">
-      <div class="glass rounded-3xl p-5 md:p-8">
-       <h2 class="text-xl md:text-2xl font-black mb-4 flex items-center gap-2"><span class="bg-yellow-300 text-sky-900 w-8 h-8 rounded-full inline-flex items-center justify-center">2</span> 溶液組成拆解</h2>
-       <div id="compGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"></div>
-       
-       <div class="bg-sky-950/40 rounded-3xl p-8 relative overflow-hidden min-h-[350px]">
-         <div id="compPlaceholder" class="absolute inset-0 flex items-center justify-center text-sky-400/50 font-bold">請在上方選擇一種溶液開始拆解</div>
-         
-         <div id="compDisplay" class="hidden flex flex-col md:flex-row items-center justify-around gap-8">
-           <div class="text-center">
-             <div class="text-xs font-black text-red-300 mb-2">SOLUTE 溶質</div>
-             <div class="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center text-4xl shadow-xl border border-white/20" id="soluteIcon"></div>
-             <div class="mt-3 font-black text-lg" id="soluteName"></div>
-           </div>
-           
-           <div class="text-4xl text-yellow-300 font-black">+</div>
-           
-           <div class="text-center">
-             <div class="text-xs font-black text-blue-300 mb-2">SOLVENT 溶劑</div>
-             <div class="w-24 h-24 bg-sky-400/20 rounded-full flex items-center justify-center text-4xl shadow-xl border border-sky-400/20" id="solventIcon">💧</div>
-             <div class="mt-3 font-black text-lg" id="solventName">水</div>
-           </div>
-           
-           <div class="text-4xl text-yellow-300 font-black">=</div>
-           
-           <div class="text-center">
-             <div class="text-xs font-black text-green-300 mb-2">SOLUTION 溶液</div>
-             <div class="beaker mx-auto" id="finalBeaker"></div>
-             <div class="mt-3 font-black text-lg" id="solutionName"></div>
-           </div>
-         </div>
-       </div>
-       
-       <div class="mt-8 glass p-6 rounded-2xl">
-         <h4 class="font-black text-yellow-300 mb-2 flex items-center gap-2"><i data-lucide="info"></i> 科學小筆記：</h4>
-         <p class="text-sm text-sky-100 leading-relaxed">
-           水溶液是由被溶解的物質（稱為<b>溶質</b>）與用來溶解的物質（稱為<b>溶劑</b>，通常是水）混合而成的均勻混合物。
-           公式：<span class="bg-white/10 px-2 py-0.5 rounded text-white">溶質 + 溶劑 = 溶液</span>
-         </p>
-       </div>
+    <section id="comp-page" class="page-section">
+      <div class="glass rounded-3xl p-8">
+        <h2 class="text-2xl font-black mb-6 text-yellow-300">溶液組成拆解</h2>
+        <div id="compGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"></div>
+        <div id="compDisplay" class="hidden flex flex-col md:flex-row items-center justify-around gap-8 bg-sky-950/40 p-8 rounded-3xl">
+          <div class="text-center"><div class="w-24 h-24 glass rounded-full flex items-center justify-center text-4xl mb-3 border border-white/20" id="soluteIcon"></div><p class="font-black">溶質：<span id="soluteName"></span></p></div>
+          <div class="text-4xl font-black text-yellow-300">+</div>
+          <div class="text-center"><div class="w-24 h-24 glass rounded-full flex items-center justify-center text-4xl mb-3 border border-sky-400/30 text-sky-300">💧</div><p class="font-black">溶劑：水</p></div>
+          <div class="text-4xl font-black text-yellow-300">=</div>
+          <div class="text-center"><div class="beaker mx-auto mb-3" id="finalBeaker"></div><p class="font-black">溶液：<span id="solutionName"></span></p></div>
+        </div>
+        <div id="compPlaceholder" class="text-center py-10 font-bold text-sky-300/50">請點選上方溶液進行拆解</div>
       </div>
     </section>
 
     <section id="match-page" class="page-section">
-     <div class="glass rounded-3xl p-5 md:p-8">
-      <h2 class="text-xl md:text-2xl font-black mb-2">性質歸類觀測</h2>
-      <p class="text-sky-200 mb-6 text-sm">請將樣品拖曳至對應區域（每個樣品在各群組限歸類一次）</p>
-      <div id="matchPool" class="flex flex-wrap gap-3 justify-center mb-8 min-h-[100px] p-4 bg-sky-950/40 rounded-2xl"></div>
-      
-      <h3 class="font-black mb-4 flex items-center gap-2 text-yellow-300"><i data-lucide="filter"></i> 酸鹼性質分類</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-       <div class="drop-zone rounded-2xl p-4 min-h-[120px]" data-group="ph" data-type="acid">
-        <div class="text-center font-black text-sm mb-2 text-red-300">🔴 酸性</div>
-        <div class="match-items flex flex-wrap gap-2 justify-center" id="ph-acid"></div>
-       </div>
-       <div class="drop-zone rounded-2xl p-4 min-h-[120px]" data-group="ph" data-type="neutral">
-        <div class="text-center font-black text-sm mb-2 text-green-300">⚪ 中性</div>
-        <div class="match-items flex flex-wrap gap-2 justify-center" id="ph-neutral"></div>
-       </div>
-       <div class="drop-zone rounded-2xl p-4 min-h-[120px]" data-group="ph" data-type="base">
-        <div class="text-center font-black text-sm mb-2 text-blue-300">🔵 鹼性</div>
-        <div class="match-items flex flex-wrap gap-2 justify-center" id="ph-base"></div>
-       </div>
+      <div class="glass rounded-3xl p-8">
+        <h2 class="text-2xl font-black mb-6 text-yellow-300">性質歸類練習</h2>
+        <p class="text-sky-200 text-sm mb-4">提示：將標籤拖曳至正確的酸鹼區，再嘗試拖曳至正確的導電區</p>
+        <div id="matchPool" class="flex flex-wrap gap-3 justify-center mb-8 min-h-[80px] p-4 bg-sky-950/40 rounded-2xl"></div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div class="space-y-4">
+            <h3 class="font-black text-sky-200 flex items-center gap-2"><i data-lucide="droplets"></i> A. 酸鹼性質</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="ph" data-type="acid">
+                <h4 class="text-center text-xs font-black text-red-300 mb-2">🔴 酸性</h4>
+                <div class="match-items flex flex-wrap gap-1 justify-center"></div>
+              </div>
+              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="ph" data-type="neutral">
+                <h4 class="text-center text-xs font-black text-green-300 mb-2">⚪ 中性</h4>
+                <div class="match-items flex flex-wrap gap-1 justify-center"></div>
+              </div>
+              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="ph" data-type="base">
+                <h4 class="text-center text-xs font-black text-blue-300 mb-2">🔵 鹼性</h4>
+                <div class="match-items flex flex-wrap gap-1 justify-center"></div>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <h3 class="font-black text-sky-200 flex items-center gap-2"><i data-lucide="zap"></i> B. 導電性質</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="cond" data-type="yes">
+                <h4 class="text-center text-xs font-black text-yellow-300 mb-2">💡 可導電</h4>
+                <div class="match-items flex flex-wrap gap-1 justify-center"></div>
+              </div>
+              <div class="drop-zone rounded-xl p-4 min-h-[120px]" data-group="cond" data-type="no">
+                <h4 class="text-center text-xs font-black text-gray-400 mb-2">⚫ 不導電</h4>
+                <div class="match-items flex flex-wrap gap-1 justify-center"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <h3 class="font-black mb-4 flex items-center gap-2 text-yellow-300"><i data-lucide="zap"></i> 導電性質分類</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-       <div class="drop-zone rounded-2xl p-4 min-h-[120px]" data-group="cond" data-type="yes">
-        <div class="text-center font-black text-sm mb-2 text-yellow-300">⚡ 導電</div>
-        <div class="match-items flex flex-wrap gap-2 justify-center" id="cond-yes"></div>
-       </div>
-       <div class="drop-zone rounded-2xl p-4 min-h-[120px]" data-group="cond" data-type="no">
-        <div class="text-center font-black text-sm mb-2 text-gray-400">❌ 不導電</div>
-        <div class="match-items flex flex-wrap gap-2 justify-center" id="cond-no"></div>
-       </div>
+    <section id="comp-match-page" class="page-section">
+      <div class="glass rounded-3xl p-8">
+        <h2 class="text-2xl font-black mb-6 text-yellow-300">組成角色分類</h2>
+        <div id="compMatchPool" class="flex flex-wrap gap-3 justify-center mb-8 min-h-[80px] p-4 bg-sky-950/40 rounded-2xl"></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="drop-zone rounded-2xl p-6 min-h-[200px]" data-group="role" data-type="solute">
+            <h4 class="text-center font-black text-orange-300 mb-4 border-b border-orange-300/20 pb-2">被溶解物質 (溶質)</h4>
+            <div class="match-items flex flex-wrap gap-2 justify-center"></div>
+          </div>
+          <div class="drop-zone rounded-2xl p-6 min-h-[200px]" data-group="role" data-type="solvent">
+            <h4 class="text-center font-black text-blue-300 mb-4 border-b border-blue-300/20 pb-2">溶解他物者 (溶劑)</h4>
+            <div class="match-items flex flex-wrap gap-2 justify-center"></div>
+          </div>
+          <div class="drop-zone rounded-2xl p-6 min-h-[200px]" data-group="role" data-type="solution">
+            <h4 class="text-center font-black text-green-300 mb-4 border-b border-green-300/20 pb-2">混合後的液體 (溶液)</h4>
+            <div class="match-items flex flex-wrap gap-2 justify-center"></div>
+          </div>
+        </div>
+        <div class="mt-6 text-center"><button onclick="initCompMatch()" class="text-xs text-sky-300 underline">重置組成分類</button></div>
       </div>
-
-      <div class="mt-8 text-center">
-       <button id="matchReset" class="bg-white/10 hover:bg-white/20 font-bold px-6 py-3 rounded-2xl border border-white/10"> 重新開始 </button>
-      </div>
-     </div>
     </section>
    </div>
   </main>
 
   <script>
-// 擴充資料：加入溶質(solute)與溶劑(solvent)資訊
 const solutions = [
-  { id: 'vinegar', name: '食醋', ph: 'acid', cond: 'yes', color: '#fbbf24', emoji: '🍶', cabbage: '#ef4444', solute: '醋酸', soluteEmoji: '🧪' },
-  { id: 'lemon', name: '檸檬汁', ph: 'acid', cond: 'yes', color: '#facc15', emoji: '🍋', cabbage: '#f43f5e', solute: '檸檬酸', soluteEmoji: '🍋' },
-  { id: 'cola', name: '汽水', ph: 'acid', cond: 'yes', color: '#78350f', emoji: '🥤', cabbage: '#fb7185', solute: '二氧化碳', soluteEmoji: '💨' },
-  { id: 'water', name: '純水', ph: 'neutral', cond: 'no', color: '#7dd3fc', emoji: '💧', cabbage: '#9333ea', solute: '無(純物質)', soluteEmoji: '🚫' },
-  { id: 'salt', name: '食鹽水', ph: 'neutral', cond: 'yes', color: '#e0f2fe', emoji: '🧂', cabbage: '#9333ea', solute: '食鹽', soluteEmoji: '🧂' },
-  { id: 'sugar', name: '糖水', ph: 'neutral', cond: 'no', color: '#fef3c7', emoji: '🍯', cabbage: '#9333ea', solute: '砂糖', soluteEmoji: '🍬' },
-  { id: 'soap', name: '肥皂水', ph: 'base', cond: 'yes', color: '#c7d2fe', emoji: '🧼', cabbage: '#22c55e', solute: '肥皂分子', soluteEmoji: '🧼' },
-  { id: 'ammonia', name: '氨水', ph: 'base', cond: 'yes', color: '#a5f3fc', emoji: '🧴', cabbage: '#10b981', solute: '氨氣', soluteEmoji: '☁️' },
+  { id: 'vinegar', name: '食醋', ph: 'acid', cond: 'yes', color: '#fbbf24', emoji: '🍶', cabbage: '#ef4444', solute: '醋酸', sEmoji: '🧪' },
+  { id: 'lemon', name: '檸檬汁', ph: 'acid', cond: 'yes', color: '#facc15', emoji: '🍋', cabbage: '#f43f5e', solute: '檸檬酸', sEmoji: '🍋' },
+  { id: 'cola', name: '汽水', ph: 'acid', cond: 'yes', color: '#78350f', emoji: '🥤', cabbage: '#fb7185', solute: '二氧化碳', sEmoji: '💨' },
+  { id: 'water', name: '純水', ph: 'neutral', cond: 'no', color: '#7dd3fc', emoji: '💧', cabbage: '#9333ea', solute: '水分子', sEmoji: '💧' },
+  { id: 'salt', name: '食鹽水', ph: 'neutral', cond: 'yes', color: '#e0f2fe', emoji: '🧂', cabbage: '#9333ea', solute: '食鹽', sEmoji: '🧂' },
+  { id: 'sugar', name: '糖水', ph: 'neutral', cond: 'no', color: '#fef3c7', emoji: '🍯', cabbage: '#9333ea', solute: '砂糖', sEmoji: '🍬' },
+  { id: 'soap', name: '肥皂水', ph: 'base', cond: 'yes', color: '#c7d2fe', emoji: '🧼', cabbage: '#22c55e', solute: '肥皂分子', sEmoji: '🧼' },
+  { id: 'ammonia', name: '氨水', ph: 'base', cond: 'yes', color: '#a5f3fc', emoji: '🧴', cabbage: '#10b981', solute: '氨氣', sEmoji: '☁️' },
 ];
 
 let selectedSol = null;
-let userMatches = {}; 
 
-// Navigation
 function switchPage(pageId, btnId) {
   document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
   document.getElementById(pageId).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(btnId).classList.add('active');
-}
-document.getElementById('toLab').onclick = () => switchPage('lab-page', 'toLab');
-document.getElementById('toComposition').onclick = () => switchPage('composition-page', 'toComposition');
-document.getElementById('toMatch').onclick = () => switchPage('match-page', 'toMatch');
-
-// Lab Logic (與原本相同)
-const solGrid = document.getElementById('solutionGrid');
-const compGrid = document.getElementById('compGrid');
-
-solutions.forEach(sol => {
-  // 性質觀察室的卡片
-  const card = document.createElement('button');
-  card.className = 'sol-card glass rounded-2xl p-4 hover:bg-white/15 transition-all';
-  card.innerHTML = `<div class="beaker mx-auto mb-2" style="--liq:${sol.color}"></div><div class="font-black text-sm">${sol.emoji} ${sol.name}</div>`;
-  card.onclick = () => {
-    selectedSol = sol;
-    document.querySelectorAll('#solutionGrid .sol-card').forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    document.getElementById('testBtn').disabled = false;
-    document.getElementById('cabbageBtn').disabled = false;
-    document.getElementById('conductivityBtn').disabled = false;
-    resetDisplays();
-  };
-  solGrid.appendChild(card);
-
-  // 組成比例觀測的卡片 (複製邏輯)
-  const compCard = card.cloneNode(true);
-  compCard.onclick = () => {
-    document.querySelectorAll('#compGrid .sol-card').forEach(c => c.classList.remove('selected'));
-    compCard.classList.add('selected');
-    showComposition(sol);
-  };
-  compGrid.appendChild(compCard);
-});
-
-function showComposition(sol) {
-  document.getElementById('compPlaceholder').classList.add('hidden');
-  const display = document.getElementById('compDisplay');
-  display.classList.remove('hidden');
-  display.classList.add('pop');
-  
-  document.getElementById('soluteIcon').textContent = sol.soluteEmoji;
-  document.getElementById('soluteName').textContent = sol.solute;
-  document.getElementById('solutionName').textContent = sol.name;
-  document.getElementById('finalBeaker').style.setProperty('--liq', sol.color);
-  
-  setTimeout(() => display.classList.remove('pop'), 400);
+  if(pageId === 'comp-match-page') initCompMatch();
+  lucide.createIcons();
 }
 
-function resetDisplays() {
-  document.getElementById('resultBox').classList.add('hidden');
-  document.getElementById('cabbageResultBox').classList.add('hidden');
-  document.getElementById('conductivityResultBox').classList.add('hidden');
-  document.getElementById('litmusPaper').className = 'litmus mb-4';
-  document.getElementById('cabbageBeaker').style.setProperty('--liq', '#9333ea');
-  document.getElementById('conductivityIcon').textContent = '💡';
+function initGrids() {
+  const labGrid = document.getElementById('solutionGrid');
+  const compGrid = document.getElementById('compGrid');
+  solutions.forEach(sol => {
+    const card = document.createElement('button');
+    card.className = 'sol-card glass rounded-2xl p-4 hover:bg-white/15 transition-all';
+    card.innerHTML = `<div class="beaker mx-auto mb-2" style="--liq:${sol.color}"></div><div class="font-black text-sm">${sol.emoji} ${sol.name}</div>`;
+    
+    const labCard = card.cloneNode(true);
+    labCard.onclick = () => {
+      selectedSol = sol;
+      document.querySelectorAll('#solutionGrid .sol-card').forEach(c => c.classList.remove('outline', 'outline-yellow-400'));
+      labCard.classList.add('outline', 'outline-yellow-400');
+      ['testBtn', 'cabbageBtn', 'conductivityBtn'].forEach(id => document.getElementById(id).disabled = false);
+    };
+    labGrid.appendChild(labCard);
+
+    const compCard = card.cloneNode(true);
+    compCard.onclick = () => {
+      document.getElementById('compPlaceholder').classList.add('hidden');
+      const disp = document.getElementById('compDisplay');
+      disp.classList.remove('hidden');
+      disp.classList.add('pop');
+      document.getElementById('soluteIcon').textContent = sol.sEmoji;
+      document.getElementById('soluteName').textContent = sol.solute;
+      document.getElementById('solutionName').textContent = sol.name;
+      document.getElementById('finalBeaker').style.setProperty('--liq', sol.color);
+      setTimeout(() => disp.classList.remove('pop'), 400);
+    };
+    compGrid.appendChild(compCard);
+  });
 }
 
-document.getElementById('testBtn').onclick = () => {
-  const paper = document.getElementById('litmusPaper');
-  const box = document.getElementById('resultBox');
-  paper.className = 'litmus mb-4 ' + (selectedSol.ph === 'acid' ? 'red-result' : selectedSol.ph === 'base' ? 'blue-result' : 'neutral-result');
-  box.innerHTML = selectedSol.ph === 'acid' ? '藍色轉紅色：酸性' : selectedSol.ph === 'base' ? '紅色轉藍色：鹼性' : '無顏色變化：中性';
-  box.classList.remove('hidden');
-  paper.classList.add('shake');
-  setTimeout(() => paper.classList.remove('shake'), 400);
-};
-
-document.getElementById('cabbageBtn').onclick = () => {
-  const b = document.getElementById('cabbageBeaker');
-  const box = document.getElementById('cabbageResultBox');
-  b.style.setProperty('--liq', selectedSol.cabbage);
-  box.innerHTML = `呈現 ${selectedSol.ph === 'acid' ? '紅/粉色' : selectedSol.ph === 'base' ? '綠/藍色' : '紫色'}`;
-  box.classList.remove('hidden');
-  b.classList.add('pop');
-  setTimeout(() => b.classList.remove('pop'), 400);
-};
-
-document.getElementById('conductivityBtn').onclick = () => {
-  const icon = document.getElementById('conductivityIcon');
-  const box = document.getElementById('conductivityResultBox');
-  icon.textContent = selectedSol.cond === 'yes' ? '💡✨' : '💡';
-  box.innerHTML = selectedSol.cond === 'yes' ? '燈泡亮起：可導電' : '燈泡不亮：不導電';
-  box.classList.remove('hidden');
-  icon.classList.add('pop');
-  setTimeout(() => icon.classList.remove('pop'), 400);
-};
-
-document.getElementById('resetBtn').onclick = () => {
-  selectedSol = null;
-  document.querySelectorAll('.sol-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('testBtn').disabled = true;
-  document.getElementById('cabbageBtn').disabled = true;
-  document.getElementById('conductivityBtn').disabled = true;
-  resetDisplays();
-};
-
-// Match Logic (與原本相同)
-function initMatch() {
+function initPropMatch() {
   const pool = document.getElementById('matchPool');
   pool.innerHTML = '';
-  userMatches = {};
-  document.querySelectorAll('.match-items').forEach(mi => mi.innerHTML = '');
-  document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('correct', 'wrong'));
-  solutions.forEach(sol => createChip(sol));
+  solutions.forEach(s => {
+    const tag = document.createElement('div');
+    tag.className = 'bg-white/10 px-4 py-2 rounded-xl font-bold cursor-grab hover:bg-white/20 border border-white/5';
+    tag.draggable = true;
+    tag.textContent = s.emoji + ' ' + s.name;
+    // 將所有性質封裝在一個標籤數據中
+    tag.ondragstart = (e) => e.dataTransfer.setData('text/plain', JSON.stringify({
+      text: s.name, 
+      ph: s.ph, 
+      cond: s.cond 
+    }));
+    pool.appendChild(tag);
+  });
 }
 
-function createChip(sol) {
-  const pool = document.getElementById('matchPool');
-  const chip = document.createElement('div');
-  chip.id = `chip-${sol.id}`;
-  chip.className = 'draggable bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl px-4 py-2 font-black text-sm flex items-center gap-2 transition-all cursor-grab';
-  chip.draggable = true;
-  chip.innerHTML = `<span>${sol.emoji}</span><span>${sol.name}</span>`;
-  chip.ondragstart = (e) => e.dataTransfer.setData('solId', sol.id);
-  pool.appendChild(chip);
+function initCompMatch() {
+  const pool = document.getElementById('compMatchPool');
+  pool.innerHTML = '';
+  document.querySelectorAll('#comp-match-page .match-items').forEach(i => i.innerHTML = '');
+  const tasks = [];
+  solutions.forEach(s => {
+    if(s.id !== 'water') {
+      tasks.push({ text: s.name, type: 'solution' });
+      tasks.push({ text: s.solute, type: 'solute' });
+    }
+  });
+  tasks.push({ text: '水', type: 'solvent' });
+  tasks.sort(() => Math.random() - 0.5).forEach(task => {
+    const tag = document.createElement('div');
+    tag.className = 'bg-white/10 px-4 py-2 rounded-xl font-bold cursor-grab hover:bg-white/20 border border-white/10';
+    tag.draggable = true;
+    tag.textContent = task.text;
+    tag.ondragstart = (e) => e.dataTransfer.setData('text/plain', JSON.stringify({text: task.text, type: task.type, group: 'role'}));
+    pool.appendChild(tag);
+  });
 }
 
 document.querySelectorAll('.drop-zone').forEach(zone => {
-  zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('over'); };
+  zone.ondragover = e => { e.preventDefault(); zone.classList.add('over'); };
   zone.ondragleave = () => zone.classList.remove('over');
-  zone.ondrop = (e) => {
+  zone.ondrop = e => {
     e.preventDefault();
     zone.classList.remove('over');
-    const id = e.dataTransfer.getData('solId');
-    const sol = solutions.find(s => s.id === id);
-    const group = zone.dataset.group;
-    const type = zone.dataset.type;
+    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+    const group = zone.dataset.group; // 'ph', 'cond', or 'role'
+    const targetType = zone.dataset.type;
 
-    const isCorrect = (group === 'ph' && sol.ph === type) || (group === 'cond' && sol.cond === type);
+    // 判斷邏輯：如果 group 是 role，檢查 type；如果是性質分類，檢查對應屬性
+    const isCorrect = (group === 'role' && data.type === targetType) || 
+                      (group === 'ph' && data.ph === targetType) || 
+                      (group === 'cond' && data.cond === targetType);
 
     if (isCorrect) {
-      if (userMatches[id] && userMatches[id][group]) {
-        const oldType = userMatches[id][group];
-        const oldContainer = document.getElementById(`${group}-${oldType}`);
-        const oldItem = oldContainer.querySelector(`[data-sol-id="${id}"]`);
-        if (oldItem) oldItem.remove();
-      }
-      if (!userMatches[id]) userMatches[id] = {};
-      userMatches[id][group] = type;
-
+      const itemsContainer = zone.querySelector('.match-items');
+      // 避免重複放入同一個標籤
+      if ([...itemsContainer.children].some(c => c.textContent === data.text)) return;
+      
       const chip = document.createElement('div');
-      chip.dataset.solId = id;
-      chip.className = 'bg-white/20 rounded-lg px-2 py-1 text-[10px] font-bold pop flex items-center gap-1';
-      chip.innerHTML = `<span>${sol.emoji}</span><span>${sol.name}</span>`;
-      zone.querySelector('.match-items').appendChild(chip);
-      zone.classList.add('correct');
-      setTimeout(() => zone.classList.remove('correct'), 500);
-
-      if (userMatches[id].ph && userMatches[id].cond) {
-        const originalChip = document.getElementById(`chip-${id}`);
-        if (originalChip) originalChip.classList.add('hidden');
-      }
+      chip.className = 'bg-white/20 px-2 py-1 rounded text-[10px] font-bold pop border border-white/10';
+      chip.textContent = data.text;
+      itemsContainer.appendChild(chip);
     } else {
-      zone.classList.add('wrong', 'shake');
-      setTimeout(() => zone.classList.remove('wrong', 'shake'), 500);
+      zone.classList.add('shake', 'bg-red-500/20');
+      setTimeout(() => zone.classList.remove('shake', 'bg-red-500/20'), 400);
     }
   };
 });
 
-document.getElementById('matchReset').onclick = initMatch;
-initMatch();
-lucide.createIcons();
+document.getElementById('conductivityBtn').onclick = () => {
+  const icon = document.getElementById('conductivityIcon');
+  if(selectedSol.cond === 'yes') {
+    icon.textContent = '💡✨';
+    icon.style.filter = 'drop-shadow(0 0 15px #fde047)';
+  } else {
+    icon.textContent = '⚫';
+    icon.style.filter = 'none';
+  }
+  icon.classList.add('pop');
+  setTimeout(() => icon.classList.remove('pop'), 400);
+};
+
+document.getElementById('testBtn').onclick = () => {
+  const p = document.getElementById('litmusPaper');
+  p.className = 'litmus mb-4 ' + (selectedSol.ph === 'acid' ? 'red-result' : selectedSol.ph === 'base' ? 'blue-result' : '');
+  p.classList.add('shake');
+  setTimeout(() => p.classList.remove('shake'), 400);
+};
+
+document.getElementById('cabbageBtn').onclick = () => {
+  const b = document.getElementById('cabbageBeaker');
+  b.style.setProperty('--liq', selectedSol.cabbage);
+  b.classList.add('pop');
+  setTimeout(() => b.classList.remove('pop'), 400);
+};
+
+window.onload = () => { initGrids(); initPropMatch(); lucide.createIcons(); };
   </script>
  </body>
 </html>
