@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 虛擬水溶液科學實驗室</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, "Microsoft JhengHei";
+            background-color: var(--bg);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--primary), #34495e);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .tab-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #bdc3c7;
+            color: #555;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        .lab-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .panel {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            max-height: 700px;
+            overflow-y: auto;
+        }
+        .panel h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            color: var(--primary);
+        }
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .item-btn {
+            padding: 10px 15px;
+            text-align: left;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        .item-btn:hover {
+            background-color: #e8f4fd;
+            border-color: var(--accent);
+        }
+        .item-btn.active {
+            background-color: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .display-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            text-align: center;
+            min-height: 450px;
+        }
+        .placeholder {
+            color: #95a5a6;
+            font-size: 18px;
+        }
+        /* 實驗視覺特效 */
+        .solution-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .visual-box {
+            display: flex;
+            gap: 20px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .indicator-card {
+            padding: 15px 25px;
+            border-radius: 8px;
+            border: 2px solid #eee;
+            font-weight: bold;
+            min-width: 150px;
+        }
+        .litmus-red { background-color: #ff9999; color: #b30000; }
+        .litmus-blue { background-color: #99ccff; color: #004d99; }
+        .cabbage-box { color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        
+        .light-bulb {
+            font-size: 80px;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+        .result-badge {
+            font-size: 20px;
+            padding: 10px 25px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        /* 酸鹼中色彩 */
+        .badge-acid { background-color: #e74c3c; }
+        .badge-base { background-color: #2ecc71; }
+        .badge-neutral { background-color: #95a5a6; }
+        /* 電解質色彩 */
+        .badge-strong { background-color: #f1c40f; color: #333; }
+        .badge-weak { background-color: #e67e22; }
+        .badge-none { background-color: #7f8c8d; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2>🏫 水溶液性質虛擬科學實驗室</h2>
+    <p>點選上方切換實驗項目，再從左側清單選擇溶液觀察實驗反應現象</p>
+</header>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('acid-base')">🧪 30種酸鹼中性檢測</button>
+    <button class="tab-btn" onclick="switchTab('conductivity')">⚡ 20種導電性測試</button>
+</div>
+
+<div class="lab-container">
+    <div class="panel">
+        <h3 id="panel-title">待測水溶液清單</h3>
+        <div id="acid-base-list" class="item-list"></div>
+        <div id="conductivity-list" class="item-list hidden"></div>
+    </div>
+
+    <div id="display-panel" class="display-area">
+        <div class="placeholder">👈 請從左側清單點選任一水溶液開始進行實驗</div>
+    </div>
+</div>
+
+<script>
+// ==================== 1. 資料庫定義 ====================
+const acidBaseDB = [
+    {name: "稀鹽酸", type: "酸性", rLitmus: "不變色(紅)", bLitmus: "變為紅色", cabbage: "深紅色", colorCode: "#e60000"},
+    {name: "稀硫酸", type: "酸性", rLitmus: "不變色(紅)", bLitmus: "變為紅色", cabbage: "深紅色", colorCode: "#e60000"},
+    {name: "食用醋", type: "酸性", rLitmus: "不變色(紅)", bLitmus: "變為紅色", cabbage: "粉紅色", colorCode: "#ff6666"},
+    {name: "檸檬汁", type: "酸性", rLitmus: "不變色(紅)", bLitmus: "變為紅色", cabbage: "紅紫色", colorCode: "#cc0066"},
+    {name: "碳酸汽水", type: "酸性", rLitmus: "不變色(紅)", bLitmus: "變為紅色", cabbage: "淺粉紅色", colorCode: "#ff9999"},
+    {name: "番茄汁", type: "酸性", rLitmus: "不變色(紅)", bLitmus: "變為紅色", cabbage: "紫紅色", colorCode: "#b30047"},
+    {name: "黑咖啡", type: "酸性", rLitmus: "不變色(紅)", bLitmus: "變為紅色", cabbage: "微紅褐色", colorCode: "#a64d3d"},
+    {name: "蘋果汁", type: "酸性", rLitmus: "不變色(紅)", bLitmus: "變為紅色", cabbage: "淺粉紅色", colorCode: "#ff9999"},
+    {name: "柳丁汁", type: "酸性", rLitmus: "不變色(紅)", bLitmus: "變為紅色", cabbage: "紅紫色", colorCode: "#cc0066"},
+    {name: "蔓越莓汁", type: "酸性", rLitmus: "不變色(紅)", bLitmus: "變為紅色", cabbage: "鮮紅色", colorCode: "#ff0000"},
+    
+    {name: "氫氧化鈉水溶液", type: "鹼性", rLitmus: "變為藍色", bLitmus: "不變色(藍)", cabbage: "黃色", colorCode: "#e6b800"},
+    {name: "澄清石灰水", type: "鹼性", rLitmus: "變為藍色", bLitmus: "不變色(藍)", cabbage: "綠色", colorCode: "#27ae60"},
+    {name: "氨水(阿摩尼亞)", type: "鹼性", rLitmus: "變為藍色", bLitmus: "不變色(藍)", cabbage: "藍綠色", colorCode: "#16a085"},
+    {name: "小蘇打水", type: "鹼性", rLitmus: "變為藍色", bLitmus: "不變色(藍)", cabbage: "藍綠色", colorCode: "#16a085"},
+    {name: "肥皂水", type: "鹼性", rLitmus: "變為藍色", bLitmus: "不變色(藍)", cabbage: "綠色", colorCode: "#27ae60"},
+    {name: "廚房漂白水", type: "鹼性", rLitmus: "變為藍色", bLitmus: "不變色(藍)", cabbage: "黃綠色", colorCode: "#a2d149"},
+    {name: "通管劑溶液", type: "鹼性", rLitmus: "變為藍色", bLitmus: "不變色(藍)", cabbage: "黃色", colorCode: "#e6b800"},
+    {name: "碳酸鈉水溶液", type: "鹼性", rLitmus: "變為藍色", bLitmus: "不變色(藍)", cabbage: "綠色", colorCode: "#27ae60"},
+    {name: "蛋白液", type: "鹼性", rLitmus: "變為藍色", bLitmus: "不變色(藍)", cabbage: "藍綠色", colorCode: "#16a085"},
+    {name: "洗衣粉水", type: "鹼性", rLitmus: "變為藍色", bLitmus: "不變色(藍)", cabbage: "綠色", colorCode: "#27ae60"},
+    
+    {name: "蒸餾水", type: "中性", rLitmus: "不變色(紅)", bLitmus: "不變色(藍)", cabbage: "紫色(不變)", colorCode: "#8e44ad"},
+    {name: "精製食鹽水", type: "中性", rLitmus: "不變色(紅)", bLitmus: "不變色(藍)", cabbage: "紫色(不變)", colorCode: "#8e44ad"},
+    {name: "蔗糖水", type: "中性", rLitmus: "不變色(紅)", bLitmus: "不變色(藍)", cabbage: "紫色(不變)", colorCode: "#8e44ad"},
+    {name: "醫用生理食鹽水", type: "中性", rLitmus: "不變色(紅)", bLitmus: "不變色(藍)", cabbage: "紫色(不變)", colorCode: "#8e44ad"},
+    {name: "75%藥用酒精", type: "中性", rLitmus: "不變色(紅)", bLitmus: "不變色(藍)", cabbage: "紫色(不變)", colorCode: "#8e44ad"},
+    {name: "葡萄糖水溶液", type: "中性", rLitmus: "不變色(紅)", bLitmus: "不變色(藍)", cabbage: "紫色(不變)", colorCode: "#8e44ad"},
+    {name: "包裝礦泉水", type: "中性", rLitmus: "不變色(紅)", bLitmus: "不變色(藍)", cabbage: "紫色(不變)", colorCode: "#8e44ad"},
+    {name: "甘油水溶液", type: "中性", rLitmus: "不變色(紅)", bLitmus: "不變色(藍)", cabbage: "紫色(不變)", colorCode: "#8e44ad"},
+    {name: "硫酸鈉水溶液", type: "中性", rLitmus: "不變色(紅)", bLitmus: "不變色(藍)", cabbage: "紫色(不變)", colorCode: "#8e44ad"},
+    {name: "氯化鉀水溶液", type: "中性", rLitmus: "不變色(紅)", bLitmus: "不變色(藍)", cabbage: "紫色(不變)", colorCode: "#8e44ad"}
+];
+
+const conductivityDB = [
+    {name: "稀鹽酸", class: "強電解質", light: "🌟🌟🌟", text: "非常明亮", status: "導電性極佳", color: "#f1c40f", opacity: "1"},
+    {name: "氫氧化鈉水溶液", class: "強電解質", light: "🌟🌟🌟", text: "非常明亮", status: "導電性極佳", color: "#f1c40f", opacity: "1"},
+    {name: "濃食鹽水", class: "強電解質", light: "🌟🌟🌟", text: "非常明亮", status: "導電性極佳", color: "#f1c40f", opacity: "1"},
+    {name: "稀硫酸", class: "強電解質", light: "🌟🌟🌟", text: "非常明亮", status: "導電性極佳", color: "#f1c40f", opacity: "1"},
+    {name: "氯化鈣溶液", class: "強電解質", light: "🌟🌟🌟", text: "非常明亮", status: "導電性極佳", color: "#f1c40f", opacity: "1"},
+    {name: "硝酸鉀溶液", class: "強電解質", light: "🌟🌟🌟", text: "非常明亮", status: "導電性極佳", color: "#f1c40f", opacity: "1"},
+    {name: "硫酸銅溶液", class: "強電解質", light: "🌟🌟🌟", text: "非常明亮", status: "導電性極佳", color: "#f1c40f", opacity: "1"},
+    {name: "氯化鎂溶液", class: "強電解質", light: "🌟🌟🌟", text: "非常明亮", status: "導電性極佳", color: "#f1c40f", opacity: "1"},
+    
+    {name: "食用醋(醋酸)", class: "弱電解質", light: "💡", text: "微弱發光", status: "導電性微弱", color: "#e67e22", opacity: "0.4"},
+    {name: "稀氨水", class: "弱電解質", light: "💡", text: "微弱發光", status: "導電性微弱", color: "#e67e22", opacity: "0.4"},
+    {name: "碳酸汽水", class: "弱電解質", light: "💡", text: "微弱發光", status: "導電性微弱", color: "#e67e22", opacity: "0.4"},
+    {name: "小蘇打水", class: "弱電解質", light: "💡", text: "微弱發光", status: "導電性微弱", color: "#e67e22", opacity: "0.4"},
+    {name: "自來水", class: "弱電解質", light: "🪫", text: "極微弱閃爍", status: "導電性極微弱", color: "#e67e22", opacity: "0.15"},
+    
+    {name: "蔗糖水溶液", class: "非電解質", light: "❌", text: "不發光", status: "完全不導電", color: "#7f8c8d", opacity: "0.1"},
+    {name: "葡萄糖水溶液", class: "非電解質", light: "❌", text: "不發光", status: "完全不導電", color: "#7f8c8d", opacity: "0.1"},
+    {name: "純蒸餾水", class: "非電解質", light: "❌", text: "不發光", status: "完全不導電", color: "#7f8c8d", opacity: "0.1"},
+    {name: "95%藥用酒精", class: "非電解質", light: "❌", text: "不發光", status: "完全不導電", color: "#7f8c8d", opacity: "0.1"},
+    {name: "甘油水溶液", class: "非電解質", light: "❌", text: "不發光", status: "完全不導電", color: "#7f8c8d", opacity: "0.1"},
+    {name: "尿素水溶液", class: "非電解質", light: "❌", text: "不發光", status: "完全不導電", color: "#7f8c8d", opacity: "0.1"},
+    {name: "麥芽糖水溶液", class: "非電解質", light: "❌", text: "不發光", status: "完全不導電", color: "#7f8c8d", opacity: "0.1"}
+];
+
+let currentMode = 'acid-base';
+
+// ==================== 2. 初始化與清單生成 ====================
+function initSystem() {
+    const abList = document.getElementById('acid-base-list');
+    const condList = document.getElementById('conductivity-list');
+    
+    // 生成酸鹼清單
+    acidBaseDB.forEach((item, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'item-btn';
+        btn.innerText = `${index + 1}. ${item.name}`;
+        btn.onclick = () => selectAcidBase(item, btn);
+        abList.appendChild(btn);
+    });
+
+    // 生成導電性清單
+    conductivityDB.forEach((item, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'item-btn';
+        btn.innerText = `${index + 1}. ${item.name}`;
+        btn.onclick = () => selectConductivity(item, btn);
+        condList.appendChild(btn);
+    });
+}
+
+// ==================== 3. 互動邏輯控制 ====================
+function switchTab(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('acid-base-list').classList.add('hidden');
+    document.getElementById('conductivity-list').classList.add('hidden');
+    
+    // 清除選中樣式與顯示區
+    document.querySelectorAll('.item-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('display-panel').innerHTML = '<div class="placeholder">👈 請從左側清單點選任一水溶液開始進行實驗</div>';
+
+    if(mode === 'acid-base') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('acid-base-list').classList.remove('hidden');
+    } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('conductivity-list').classList.remove('hidden');
+    }
+}
+
+function clearActiveButtons() {
+    document.querySelectorAll('.item-btn').forEach(btn => btn.classList.remove('active'));
+}
+
+// 點選酸鹼溶液後的畫面渲染
+function selectAcidBase(item, element) {
+    clearActiveButtons();
+    element.classList.add('active');
+    
+    let typeClass = item.type === '酸性' ? 'badge-acid' : (item.type === '鹼性' ? 'badge-base' : 'badge-neutral');
+    let rColor = item.rLitmus.includes("藍") ? "background-color:#4da6ff; color:white; border-color:#0066cc;" : "";
+    let bColor = item.bLitmus.includes("紅") ? "background-color:#ff4d4d; color:white; border-color:#cc0000;" : "";
+
+    const display = document.getElementById('display-panel');
+    display.innerHTML = `
+        <div class="solution-title">🧪 正在測試：${item.name}</div>
+        <div style="font-size:16px; color:#7f8c8d; margin-bottom:15px;">指示劑顯色現象：</div>
+        
+        <div class="visual-box">
+            <div class="indicator-card litmus-red" style="${rColor}">
+                紅色石蕊試紙：<br><span style="font-size:18px;">${item.rLitmus}</span>
+            </div>
+            <div class="indicator-card litmus-blue" style="${bColor}">
+                藍色石蕊試紙：<br><span style="font-size:18px;">${item.bLitmus}</span>
+            </div>
+            <div class="indicator-card cabbage-box" style="background-color: ${item.colorCode}; border-color: ${item.colorCode}">
+                紫色甘藍菜汁：<br><span style="font-size:18px;">${item.cabbage}</span>
+            </div>
+        </div>
+        
+        <div>
+            <span class="result-badge ${typeClass}">實驗判定：${item.type}</span>
+        </div>
+    `;
+}
+
+// 點選導電性溶液後的畫面渲染
+function selectConductivity(item, element) {
+    clearActiveButtons();
+    element.classList.add('active');
+    
+    let classStyle = item.class === '強電解質' ? 'badge-strong' : (item.class === '弱電解質' ? 'badge-weak' : 'badge-none');
+    let bulbIcon = item.class === '強電解質' ? '💡' : (item.class === '弱電解質' ? '💡' : '🌑');
+    let bulbShadow = item.class === '強電解質' ? 'filter: drop-shadow(0 0 25px #f1c40f);' : (item.class === '弱電解質' ? 'filter: drop-shadow(0 0 8px #e67e22);' : '');
+
+    const display = document.getElementById('display-panel');
+    display.innerHTML = `
+        <div class="solution-title">⚡ 正在測試：${item.name}</div>
+        <div style="font-size: 16px; color: #7f8c8d;">電路裝置與發光測試：</div>
+        
+        <div class="light-bulb" style="opacity: ${item.opacity}; ${bulbShadow}">
+            ${bulbIcon}
+        </div>
+        
+        <div style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">
+            燈泡亮度：${item.light} (${item.text}) <br>
+            <span style="color:var(--primary); font-size:18px;">➔ 現象：${item.status}</span>
+        </div>
+        
+        <div>
+            <span class="result-badge ${classStyle}">分類屬性：${item.class}</span>
+        </div>
+    `;
+}
+
+// 啟動系統
+window.onload = initSystem;
+</script>
+
+</body>
+</html>
