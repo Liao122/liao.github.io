@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>槓桿原理模擬（優化版）</title>
+
+<style>
+body {
+    font-family: "Segoe UI", sans-serif;
+    background: #f5f7fb;
+    text-align: center;
+}
+
+h2 {
+    margin-top: 15px;
+}
+
+canvas {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.panel {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 15px;
+}
+
+.box {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    width: 260px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.left { border-top: 5px solid #3498db; }
+.right { border-top: 5px solid #e74c3c; }
+
+input {
+    width: 100%;
+}
+
+.result {
+    font-size: 20px;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.formula {
+    background: #fff;
+    margin: 10px auto;
+    padding: 10px;
+    width: 60%;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+</style>
+
+</head>
+<body>
+
+<h2>⚖️ 槓桿原理互動模擬</h2>
+
+<canvas id="canvas" width="900" height="300"></canvas>
+
+<div class="panel">
+
+<div class="box left">
+<h3>🔵 左側</h3>
+重量1 <input type="range" id="lw1" min="0" max="20" value="5">
+距離1 <input type="range" id="ld1" min="10" max="250" value="100">
+
+重量2 <input type="range" id="lw2" min="0" max="20" value="0">
+距離2 <input type="range" id="ld2" min="10" max="250" value="150">
+
+重量3 <input type="range" id="lw3" min="0" max="20" value="0">
+距離3 <input type="range" id="ld3" min="10" max="250" value="200">
+</div>
+
+<div class="box right">
+<h3>🔴 右側</h3>
+重量1 <input type="range" id="rw1" min="0" max="20" value="5">
+距離1 <input type="range" id="rd1" min="10" max="250" value="100">
+
+重量2 <input type="range" id="rw2" min="0" max="20" value="0">
+距離2 <input type="range" id="rd2" min="10" max="250" value="150">
+
+重量3 <input type="range" id="rw3" min="0" max="20" value="0">
+距離3 <input type="range" id="rd3" min="10" max="250" value="200">
+</div>
+
+</div>
+
+<div class="result" id="result"></div>
+<div class="formula" id="formula"></div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const inputs = document.querySelectorAll("input");
+
+function val(id){
+    return parseFloat(document.getElementById(id).value);
+}
+
+function draw(){
+
+    ctx.clearRect(0,0,900,300);
+
+    const pivot = 450;
+    const baseY = 150;
+
+    // 槓桿
+    ctx.beginPath();
+    ctx.moveTo(100, baseY);
+    ctx.lineTo(800, baseY);
+    ctx.lineWidth = 6;
+    ctx.stroke();
+
+    // 支點
+    ctx.beginPath();
+    ctx.moveTo(pivot, baseY);
+    ctx.lineTo(pivot-20, baseY+50);
+    ctx.lineTo(pivot+20, baseY+50);
+    ctx.fillStyle="#555";
+    ctx.fill();
+
+    let leftTorque = 0;
+    let rightTorque = 0;
+
+    let leftFormula = [];
+    let rightFormula = [];
+
+    // 左側
+    for(let i=1;i<=3;i++){
+        let w = val("lw"+i);
+        let d = val("ld"+i);
+
+        let x = pivot - d;
+
+        ctx.fillStyle = "#3498db";
+        ctx.fillRect(x-10, baseY - w*5, 20, w*5);
+
+        if(w>0){
+            leftTorque += w*d;
+            leftFormula.push(`${w}×${d}`);
+        }
+    }
+
+    // 右側
+    for(let i=1;i<=3;i++){
+        let w = val("rw"+i);
+        let d = val("rd"+i);
+
+        let x = pivot + d;
+
+        ctx.fillStyle = "#e74c3c";
+        ctx.fillRect(x-10, baseY - w*5, 20, w*5);
+
+        if(w>0){
+            rightTorque += w*d;
+            rightFormula.push(`${w}×${d}`);
+        }
+    }
+
+    // 判斷
+    let msg="";
+    if(Math.abs(leftTorque-rightTorque)<50){
+        msg="⚖️ 平衡";
+    }else if(leftTorque>rightTorque){
+        msg="⬅️ 左側較重";
+    }else{
+        msg="➡️ 右側較重";
+    }
+
+    document.getElementById("result").innerText =
+        `左力矩 ${leftTorque} ｜ 右力矩 ${rightTorque} → ${msg}`;
+
+    document.getElementById("formula").innerText =
+        `左：${leftFormula.join(" + ")} = ${leftTorque}　｜　右：${rightFormula.join(" + ")} = ${rightTorque}`;
+}
+
+inputs.forEach(i => i.oninput = draw);
+
+draw();
+</script>
+
+</body>
+</html>
