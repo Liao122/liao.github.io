@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>輪軸模擬器</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --wheel-color: #3498db;
+            --axle-color: #f1c40f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--primary-color);
+        }
+
+        h1 {
+            margin-bottom: 5px;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .control-panel {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .visual-panel {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            outline: none;
+            accent-color: var(--primary-color);
+        }
+
+        .value-display {
+            float: right;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #2980b9;
+        }
+
+        .dashboard {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .dashboard h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .result-line {
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        canvas {
+            background: #fff;
+            border: 1px solid #dcdde1;
+            border-radius: 8px;
+            max-width: 100%;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>輪軸模擬器</h1>
+    <p class="subtitle">施力於大輪，帶動小軸旋轉。</p>
+
+    <div class="container">
+        <div class="control-panel">
+            <div class="control-group">
+                <label>大輪半徑 R: 
+                    <span id="R-val" class="value-display">150 像素</span>
+                </label>
+                <input type="range" id="input-R" min="100" max="180" value="150" step="5">
+            </div>
+
+            <div class="control-group">
+                <label>小軸半徑 r: 
+                    <span id="r-val" class="value-display">50 像素</span>
+                </label>
+                <input type="range" id="input-r" min="30" max="95" value="50" step="5">
+            </div>
+
+            <div class="dashboard">
+                <h3>計算結果</h3>
+                <div class="result-line">
+                    <span>省力倍數:</span>
+                    <span id="ma-val" style="color: var(--accent-color);">3.00 倍</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="visual-panel">
+            <canvas id="canvas" width="400" height="400"></canvas>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="color-box" style="background: var(--wheel-color);"></div>
+                    <span>大輪</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: var(--axle-color);"></div>
+                    <span>小軸</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const inputR = document.getElementById('input-R');
+        const inputr = document.getElementById('input-r');
+        const valR = document.getElementById('R-val');
+        const valr = document.getElementById('r-val');
+        const valMA = document.getElementById('ma-val');
+
+        let angle = 0;
+        const speed = 0.02;
+
+        function update() {
+            const R = parseFloat(inputR.value);
+            const r = parseFloat(inputr.value);
+            
+            valR.innerText = `${R} 像素`;
+            valr.innerText = `${r} 像素`;
+            
+            const ma = (R / r).toFixed(2);
+            valMA.innerText = `${ma} 倍`;
+
+            draw(R, r);
+            
+            angle += speed;
+            if (angle >= Math.PI * 2) {
+                angle = 0;
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        function draw(R, r) {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = '#f1f2f6';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height);
+            ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy);
+            ctx.stroke();
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(angle);
+
+            ctx.beginPath();
+            ctx.arc(0, 0, R, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.2)';
+            ctx.fill();
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(241, 196, 15, 0.6)';
+            ctx.fill();
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            const spokes = 4;
+            for (let i = 0; i < spokes; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                const currentAngle = (i * Math.PI) / 2;
+                ctx.lineTo(Math.cos(currentAngle) * R, Math.sin(currentAngle) * R);
+                ctx.stroke();
+            }
+
+            for (let i = 0; i < spokes; i++) {
+                const currentAngle = (i * Math.PI) / 2;
+                ctx.beginPath();
+                ctx.arc(Math.cos(currentAngle) * R, Math.sin(currentAngle) * R, 5, 0, Math.PI*2);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fill();
+            }
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#2c3e50';
+            ctx.fill();
+
+            ctx.restore();
+
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + R, cy);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx, cy + r);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        update();
+    </script>
+</body>
+</html>
